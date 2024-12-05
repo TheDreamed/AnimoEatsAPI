@@ -1,14 +1,14 @@
-import ssl
-import pg8000
-import pandas as pd
-import os
-from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+import pandas as pd
+import pg8000
+import os
+import ssl
+import logging
+from dotenv import load_dotenv
 from sklearn.svm import SVC
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
-import logging
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -45,21 +45,16 @@ category_mapping = {
 }
 
 def get_ssl_context():
-    # Option 1: Proper SSL Configuration
+    # Proper SSL Configuration
     ssl_ctx = ssl.create_default_context()
-    ssl_ctx.load_verify_locations(cafile='path/to/ca_certificate.pem')  # Update the path
+    # If using a self-signed certificate, load it here
+    # ssl_ctx.load_verify_locations(cafile='path/to/ca_certificate.pem')
     return ssl_ctx
-
-    # Option 2: Insecure SSL Configuration (Use only for development)
-    # ssl_ctx = ssl.create_default_context()
-    # ssl_ctx.check_hostname = False
-    # ssl_ctx.verify_mode = ssl.CERT_NONE
-    # return ssl_ctx
 
 def fetch_data_user_data():
     connection = None
     try:
-        # Establish a connection to the PostgreSQL database
+        # Establish a connection to the PostgreSQL database with SSL
         connection = pg8000.connect(
             host=DB_HOST,
             port=DB_PORT,
@@ -105,6 +100,7 @@ def fetch_data_user_data():
         # Combine the DataFrames
         combined_df = pd.concat([df_health, df_allergies, df_category_pivot], axis=1)
 
+        logger.info("Successfully fetched and combined user data.")
         return combined_df
 
     except Exception as e:
@@ -118,7 +114,7 @@ def fetch_data_user_data():
 def fetch_and_transform_food_data():
     connection = None
     try:
-        # Establish a connection to the PostgreSQL database
+        # Establish a connection to the PostgreSQL database with SSL
         connection = pg8000.connect(
             host=DB_HOST,
             port=DB_PORT,
@@ -144,17 +140,16 @@ def fetch_and_transform_food_data():
         # Convert to DataFrame
         df = pd.DataFrame(data, columns=column_names)
 
-        # **Rename 'id' to 'foodItemId'**
+        # Rename 'id' to 'foodItemId'
         if 'id' in df.columns:
             df.rename(columns={'id': 'foodItemId'}, inplace=True)
             logger.info("Renamed 'id' to 'foodItemId' in df_food_details.")
         else:
             logger.warning(f"'id' column not found in df_food_details. Available columns: {df.columns.tolist()}")
 
-        # **Optional: Verify the renaming**
+        # Verify the renaming
         logger.info(f"df_food_details columns after renaming: {df.columns.tolist()}")
 
-        # Return the DataFrame with all data
         return df
 
     except Exception as e:
@@ -168,7 +163,7 @@ def fetch_and_transform_food_data():
 def fetch_and_transform_swipe_data():
     connection = None
     try:
-        # Establish a connection to the PostgreSQL database
+        # Establish a connection to the PostgreSQL database with SSL
         connection = pg8000.connect(
             host=DB_HOST,
             port=DB_PORT,
@@ -197,7 +192,7 @@ def fetch_and_transform_swipe_data():
         # Rename columns
         df.rename(columns={"userId": "user_id", "categoryId": "categoryId", "foodItemId": "foodItemId"}, inplace=True)
 
-        # Map categoryId to category names (if category_mapping is provided)
+        # Map categoryId to category names
         df["categoryId"] = df["categoryId"].map(category_mapping)
 
         # Filter rows where preference is 'like' and convert it to 1
@@ -212,7 +207,7 @@ def fetch_and_transform_swipe_data():
                 "categoryId": group["categoryId"].tolist(),
             }
 
-        # Return the recommendations dictionary
+        logger.info("Successfully fetched and transformed swipe data.")
         return expected_recommendations
 
     except Exception as e:
@@ -345,6 +340,7 @@ async def get_recommendations():
     try:
         # Determine the user_id internally
         if not expected_recommendations:
+            logger.warning("No recommendations available.")
             raise HTTPException(status_code=404, detail="No recommendations available.")
 
         # For demonstration, select the latest user_id
@@ -362,6 +358,7 @@ async def get_recommendations():
         )
 
         if recommendations_df.empty:
+            logger.warning(f"No recommendations available for user {user_id}")
             raise HTTPException(status_code=404, detail=f"No recommendations available for user {user_id}")
 
         # Convert the recommendations to a list of dictionaries
