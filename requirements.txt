@@ -1,7 +1,1037 @@
-fastapi[all]
-pydantic==1.10.7
-pandas==1.5.3
-pg8000==1.21.1
-python-dotenv==1.0.0
-scikit-learn==1.3.0
-uvicorn==0.22.0
+  a b s l - p y = = 2 . 0 . 0 
+ 
+ a i o b o t o c o r e   @   f i l e : / / / C : / b / a b s _ a 0 z x r s v p w x / c r o o t / a i o b o t o c o r e _ 1 7 1 4 4 6 4 4 5 4 6 9 2 / w o r k 
+ 
+ a i o f i l e s = = 2 3 . 2 . 1 
+ 
+ a i o h a p p y e y e b a l l s = = 2 . 3 . 4 
+ 
+ a i o h t t p = = 3 . 1 1 . 8 
+ 
+ a i o i t e r t o o l s   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / a i o i t e r t o o l s _ 1 6 0 7 1 0 9 6 6 5 7 6 2 / w o r k 
+ 
+ a i o s i g n a l = = 1 . 3 . 1 
+ 
+ a l a b a s t e r   @   f i l e : / / / C : / b / a b s _ 4 5 b a 4 v a c a j / c r o o t / a l a b a s t e r _ 1 7 1 8 2 0 1 5 0 2 2 5 2 / w o r k 
+ 
+ a l t a i r = = 5 . 3 . 0 
+ 
+ a n a c o n d a - a n o n - u s a g e   @   f i l e : / / / C : / b / a b s _ c 3 w _ h 1 z z j g / c r o o t / a n a c o n d a - a n o n - u s a g e _ 1 7 1 0 9 6 5 2 0 4 6 2 2 / w o r k 
+ 
+ a n a c o n d a - c a t a l o g s   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / a n a c o n d a - c a t a l o g s _ 1 7 0 1 8 1 6 5 8 6 1 1 7 / w o r k 
+ 
+ a n a c o n d a - c l i e n t   @   f i l e : / / / C : / b / a b s _ 3 4 t x u t m 0 u e / c r o o t / a n a c o n d a - c l i e n t _ 1 7 0 8 6 4 0 7 0 5 2 9 4 / w o r k 
+ 
+ a n a c o n d a - c l o u d - a u t h   @   f i l e : / / / C : / b / a b s _ b 0 2 e v i 8 4 g h / c r o o t / a n a c o n d a - c l o u d - a u t h _ 1 7 1 3 9 9 1 4 4 5 7 7 0 / w o r k 
+ 
+ a n a c o n d a - n a v i g a t o r   @   f i l e : / / / C : / b / a b s _ d 8 d 4 a 0 2 c 3 t / c r o o t / a n a c o n d a - n a v i g a t o r _ 1 7 1 3 4 6 4 0 6 3 9 7 0 / w o r k 
+ 
+ a n a c o n d a - p r o j e c t   @   f i l e : / / / C : / b / a b s _ 9 5 s 0 l 9 d w v d / c r o o t / a n a c o n d a - p r o j e c t _ 1 7 0 6 0 4 9 2 5 7 6 8 7 / w o r k 
+ 
+ a n n o t a t e d - t y p e s   @   f i l e : / / / C : / b / a b s _ 0 d m a o y h h j 3 / c r o o t / a n n o t a t e d - t y p e s _ 1 7 0 9 5 4 2 9 6 8 3 1 1 / w o r k 
+ 
+ a n y i o   @   f i l e : / / / C : / b / a b s _ 8 4 7 u o b e 7 e a / c r o o t / a n y i o _ 1 7 0 6 2 2 0 2 2 4 0 3 7 / w o r k 
+ 
+ a p p d i r s = = 1 . 4 . 4 
+ 
+ a r c h s p e c   @   f i l e : / / / c r o o t / a r c h s p e c _ 1 7 0 9 2 1 7 6 4 2 1 2 9 / w o r k 
+ 
+ a r g o n 2 - c f f i   @   f i l e : / / / o p t / c o n d a / c o n d a - b l d / a r g o n 2 - c f f i _ 1 6 4 5 0 0 0 2 1 4 1 8 3 / w o r k 
+ 
+ a r g o n 2 - c f f i - b i n d i n g s   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / a r g o n 2 - c f f i - b i n d i n g s _ 1 6 9 9 5 4 9 8 0 1 1 1 7 / w o r k 
+ 
+ a r r o w   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / a r r o w _ 1 6 9 9 5 4 9 8 5 1 0 0 4 / w o r k 
+ 
+ a s n 1 c r y p t o = = 1 . 5 . 1 
+ 
+ a s t r o i d   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / a s t r o i d _ 1 6 9 9 4 8 0 4 1 8 1 8 9 / w o r k 
+ 
+ a s t r o p y   @   f i l e : / / / C : / b / a b s _ 6 f b 0 i d w u u s / c r o o t / a s t r o p y _ 1 7 1 7 7 7 1 8 3 3 5 9 9 / w o r k 
+ 
+ a s t r o p y - i e r s - d a t a   @   f i l e : / / / C : / b / a b s _ 2 5 j 3 3 2 3 g v o / c r o o t / a s t r o p y - i e r s - d a t a _ 1 7 1 7 7 0 0 7 7 1 2 3 4 / w o r k 
+ 
+ a s t t o k e n s = = 2 . 4 . 1 
+ 
+ a s t u n p a r s e = = 1 . 6 . 3 
+ 
+ a s y n c - l r u   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / a s y n c - l r u _ 1 7 0 1 7 9 6 8 5 9 3 5 7 / w o r k 
+ 
+ a t o m i c w r i t e s = = 1 . 4 . 0 
+ 
+ a t t r s = = 2 3 . 2 . 0 
+ 
+ A u t o m a t   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / a u t o m a t _ 1 6 0 0 2 9 8 4 3 1 1 7 3 / w o r k 
+ 
+ a u t o p e p 8   @   f i l e : / / / c r o o t / a u t o p e p 8 _ 1 7 0 8 9 6 2 8 8 2 0 1 6 / w o r k 
+ 
+ B a b e l   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / b a b e l _ 1 6 9 9 4 7 5 7 8 5 7 4 0 / w o r k 
+ 
+ b c r y p t   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / b c r y p t _ 1 6 9 9 4 8 3 8 4 2 2 5 8 / w o r k 
+ 
+ b e a u t i f u l s o u p 4   @   f i l e : / / / C : / b / a b s _ d 5 w y t g _ p 0 w / c r o o t / b e a u t i f u l s o u p 4 - s p l i t _ 1 7 1 8 0 2 9 8 3 3 7 4 9 / w o r k 
+ 
+ b i n a r y o r n o t   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / b i n a r y o r n o t _ 1 6 1 7 7 5 1 5 2 5 0 1 0 / w o r k 
+ 
+ b l a c k   @   f i l e : / / / C : / b / a b s _ 7 8 b 8 t b 3 p k d / c r o o t / b l a c k _ 1 7 1 7 5 9 7 5 0 6 3 5 1 / w o r k 
+ 
+ b l e a c h   @   f i l e : / / / o p t / c o n d a / c o n d a - b l d / b l e a c h _ 1 6 4 1 5 7 7 5 5 8 9 5 9 / w o r k 
+ 
+ b l i n k e r = = 1 . 8 . 1 
+ 
+ b o k e h   @   f i l e : / / / C : / b / a b s _ 0 a e s 0 r b x n z / c r o o t / b o k e h _ 1 7 1 8 1 1 9 0 7 2 1 8 3 / w o r k 
+ 
+ b o l t o n s   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / b o l t o n s _ 1 6 9 9 4 8 0 4 5 0 0 9 2 / w o r k 
+ 
+ b o t o 3 = = 1 . 3 4 . 1 4 3 
+ 
+ b o t o c o r e = = 1 . 3 4 . 1 4 3 
+ 
+ B o t t l e n e c k   @   f i l e : / / / C : / b / a b s _ f 7 u n 8 5 5 i d q / c r o o t / b o t t l e n e c k _ 1 7 0 9 0 6 9 9 6 9 6 3 3 / w o r k 
+ 
+ B r o t l i   @   f i l e : / / / C : / b / a b s _ 3 d 3 6 m n o 4 8 0 / c r o o t / b r o t l i - s p l i t _ 1 7 1 4 4 8 3 1 7 8 6 4 2 / w o r k 
+ 
+ C a c h e C o n t r o l = = 0 . 1 4 . 0 
+ 
+ c a c h e t o o l s = = 5 . 3 . 3 
+ 
+ c e r t i f i = = 2 0 2 3 . 1 1 . 1 7 
+ 
+ c f f i   @   f i l e : / / / C : / b / a b s _ 7 8 e b 1 _ v q 6 z / c r o o t / c f f i _ 1 7 1 4 4 8 3 2 0 6 0 9 6 / w o r k 
+ 
+ c h a r d e t   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / c h a r d e t _ 1 6 9 9 4 9 8 8 9 2 8 0 2 / w o r k 
+ 
+ c h a r s e t - n o r m a l i z e r = = 3 . 3 . 2 
+ 
+ c l i c k = = 8 . 1 . 7 
+ 
+ c l o u d e v e n t s = = 1 . 9 . 0 
+ 
+ c l o u d p i c k l e = = 2 . 2 . 1 
+ 
+ c m a k e = = 3 . 3 0 . 4 
+ 
+ c o l o r a m a = = 0 . 4 . 6 
+ 
+ c o l o r c e t   @   f i l e : / / / C : / b / a b s _ 7 e p 0 m f a w e z / c r o o t / c o l o r c e t _ 1 7 0 9 7 5 8 4 0 5 2 3 2 / w o r k 
+ 
+ c o m m = = 0 . 2 . 0 
+ 
+ c o n d a   @   f i l e : / / / C : / b / a b s _ f 3 e g t z u m c q / c r o o t / c o n d a _ 1 7 1 5 6 3 5 8 8 6 0 3 9 / w o r k 
+ 
+ c o n d a - b u i l d   @   f i l e : / / / C : / b / a b s _ 8 5 s t 9 w 2 8 3 e / c r o o t / c o n d a - b u i l d _ 1 7 1 6 9 9 1 3 5 4 8 6 1 / w o r k 
+ 
+ c o n d a - c o n t e n t - t r u s t   @   f i l e : / / / C : / b / a b s _ b d f a t n _ w z f / c r o o t / c o n d a - c o n t e n t - t r u s t _ 1 7 1 4 4 8 3 2 0 1 9 0 9 / w o r k 
+ 
+ c o n d a - l i b m a m b a - s o l v e r   @   f i l e : / / / c r o o t / c o n d a - l i b m a m b a - s o l v e r _ 1 7 0 6 7 3 3 2 8 7 6 0 5 / w o r k / s r c 
+ 
+ c o n d a - p a c k   @   f i l e : / / / C : / b / a b s _ 0 c u 9 1 s b a u 5 / c r o o t / c o n d a - p a c k _ 1 7 1 0 2 5 8 0 9 7 5 6 6 / w o r k 
+ 
+ c o n d a - p a c k a g e - h a n d l i n g   @   f i l e : / / / C : / b / a b s _ 8 3 1 _ p y p u u z / c r o o t / c o n d a - p a c k a g e - h a n d l i n g _ 1 7 1 8 1 3 8 2 8 7 7 9 0 / w o r k 
+ 
+ c o n d a - r e p o - c l i   @   f i l e : / / / C : / b / a b s _ 7 d l v g 5 f _ 6 q / c r o o t / c o n d a - r e p o - c l i _ 1 7 0 9 2 4 6 6 6 7 7 8 0 / w o r k 
+ 
+ c o n d a - t o k e n   @   f i l e : / / / c r o o t / c o n d a - t o k e n _ 1 7 1 8 9 9 5 7 5 1 2 8 5 / w o r k 
+ 
+ c o n d a _ i n d e x   @   f i l e : / / / C : / b / a b s _ 4 5 v 3 w 9 8 i m _ / c r o o t / c o n d a - i n d e x _ 1 7 1 9 3 3 8 2 4 5 7 3 1 / w o r k 
+ 
+ c o n d a _ p a c k a g e _ s t r e a m i n g   @   f i l e : / / / C : / b / a b s _ f e 6 z b 0 _ j 8 _ / c r o o t / c o n d a - p a c k a g e - s t r e a m i n g _ 1 7 1 8 1 3 6 0 9 8 6 4 2 / w o r k 
+ 
+ c o n s t a n t l y   @   f i l e : / / / C : / b / a b s _ c b u a v w 4 4 4 3 / c r o o t / c o n s t a n t l y _ 1 7 0 3 1 6 5 6 1 7 4 0 3 / w o r k 
+ 
+ c o n t o u r p y = = 1 . 2 . 1 
+ 
+ c o o k i e c u t t e r   @   f i l e : / / / C : / b / a b s _ 6 6 u n t p u 1 u b / c r o o t / c o o k i e c u t t e r _ 1 7 1 1 0 5 9 8 6 9 7 7 9 / w o r k 
+ 
+ c r y p t o g r a p h y   @   f i l e : / / / C : / b / a b s _ 9 7 l g s k w e r x / c r o o t / c r y p t o g r a p h y _ 1 7 1 4 6 6 4 7 3 6 2 5 0 / w o r k 
+ 
+ c s s s e l e c t   @   f i l e : / / / C : / b / a b s _ 7 1 g n j a b 7 b 0 / c r o o t / c s s s e l e c t _ 1 7 0 7 3 3 9 9 5 5 5 3 0 / w o r k 
+ 
+ c v z o n e = = 1 . 6 . 1 
+ 
+ c y c l e r = = 0 . 1 2 . 1 
+ 
+ c y t o o l z   @   f i l e : / / / C : / b / a b s _ d 4 3 s 8 l n b 6 0 / c r o o t / c y t o o l z _ 1 7 0 1 7 2 3 6 3 6 6 9 9 / w o r k 
+ 
+ d a s k   @   f i l e : / / / C : / b / a b s _ b 0 i t 6 f c s 7 9 / c r o o t / d a s k - c o r e _ 1 7 1 5 8 3 8 6 2 5 1 5 8 / w o r k 
+ 
+ d a s k - e x p r   @   f i l e : / / / C : / b / a b s _ c f 3 8 e h s x u s / c r o o t / d a s k - e x p r _ 1 7 1 5 8 4 6 4 9 6 6 3 3 / w o r k 
+ 
+ d a t a c l a s s e s - j s o n = = 0 . 6 . 7 
+ 
+ d a t a s h a d e r   @   f i l e : / / / C : / b / a b s _ d 3 5 e q 9 8 l _ y / c r o o t / d a t a s h a d e r _ 1 7 1 8 1 2 1 5 1 1 2 5 7 / w o r k 
+ 
+ d e b u g p y = = 1 . 8 . 0 
+ 
+ d e c o r a t o r = = 5 . 1 . 1 
+ 
+ d e f u s e d x m l   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / d e f u s e d x m l _ 1 6 1 5 2 2 8 1 2 7 5 1 6 / w o r k 
+ 
+ D e p r e c a t e d = = 1 . 2 . 1 4 
+ 
+ d e p r e c a t i o n = = 2 . 1 . 0 
+ 
+ d i f f - m a t c h - p a t c h   @   f i l e : / / / U s e r s / k t i e t z / d e m o / m c 3 / c o n d a - b l d / d i f f - m a t c h - p a t c h _ 1 6 3 0 5 1 1 8 4 0 8 7 4 / w o r k 
+ 
+ d i l l = = 0 . 3 . 8 
+ 
+ d i r t y j s o n = = 1 . 0 . 8 
+ 
+ d i s t r i b u t e d   @   f i l e : / / / C : / b / a b s _ 2 7 j q u r d 3 g k / c r o o t / d i s t r i b u t e d _ 1 7 1 5 8 4 4 5 1 2 0 6 5 / w o r k 
+ 
+ d i s t r o   @   f i l e : / / / C : / b / a b s _ 7 1 x r 3 6 u a 5 r / c r o o t / d i s t r o _ 1 7 1 4 4 8 8 2 8 2 6 7 6 / w o r k 
+ 
+ d l i b = = 1 9 . 2 4 . 6 
+ 
+ d o c k e r = = 7 . 1 . 0 
+ 
+ d o c s t r i n g - t o - m a r k d o w n   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / d o c s t r i n g - t o - m a r k d o w n _ 1 6 9 9 4 8 4 2 6 5 1 6 7 / w o r k 
+ 
+ d o c u t i l s = = 0 . 2 0 . 1 
+ 
+ e n t r y p o i n t s   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / e n t r y p o i n t s _ 1 6 9 9 4 8 4 2 9 5 2 2 7 / w o r k 
+ 
+ e t - x m l f i l e   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / e t _ x m l f i l e _ 1 6 9 9 5 0 0 3 7 3 1 4 4 / w o r k 
+ 
+ e x e c u t i n g = = 2 . 0 . 1 
+ 
+ f a c e - r e c o g n i t i o n = = 1 . 3 . 0 
+ 
+ f a c e _ r e c o g n i t i o n _ m o d e l s = = 0 . 3 . 0 
+ 
+ f a s t a p i = = 0 . 1 1 5 . 5 
+ 
+ f a s t j s o n s c h e m a   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p y t h o n - f a s t j s o n s c h e m a _ 1 6 9 9 4 7 5 1 3 4 3 0 0 / w o r k 
+ 
+ f f m p y = = 0 . 4 . 0 
+ 
+ f i l e l o c k = = 3 . 1 3 . 1 
+ 
+ f i l e t y p e = = 1 . 2 . 0 
+ 
+ f i r e b a s e = = 4 . 0 . 1 
+ 
+ f i r e b a s e - a d m i n = = 6 . 5 . 0 
+ 
+ f i r e b a s e - f u n c t i o n s = = 0 . 1 . 2 
+ 
+ f l a k e 8   @   f i l e : / / / C : / b / a b s _ c a u d 6 6 d r f v / c r o o t / f l a k e 8 _ 1 7 0 8 9 6 5 3 1 6 7 7 8 / w o r k 
+ 
+ F l a s k   @   f i l e : / / / C : / b / a b s _ f 9 w 7 d o y u 0 h / c r o o t / f l a s k _ 1 7 1 6 5 4 5 9 2 4 8 8 4 / w o r k 
+ 
+ F l a s k - C o r s = = 5 . 0 . 0 
+ 
+ f l a t b u f f e r s = = 2 4 . 3 . 7 
+ 
+ f l u t t e r = = 0 . 1 
+ 
+ f o n t t o o l s = = 4 . 5 3 . 0 
+ 
+ f r o z e n d i c t   @   f i l e : / / / C : / b / a b s _ 2 a l a m q s s 6 p / c r o o t / f r o z e n d i c t _ 1 7 1 3 1 9 4 8 8 5 1 2 4 / w o r k 
+ 
+ f r o z e n l i s t = = 1 . 4 . 1 
+ 
+ f s s p e c = = 2 0 2 4 . 2 . 0 
+ 
+ f u n c t i o n s - f r a m e w o r k = = 3 . 8 . 2 
+ 
+ g a s t = = 0 . 5 . 4 
+ 
+ g e n s i m   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / g e n s i m _ 1 6 9 9 5 5 7 1 3 9 1 9 9 / w o r k 
+ 
+ g i t d b = = 4 . 0 . 1 1 
+ 
+ G i t P y t h o n = = 3 . 1 . 4 3 
+ 
+ g o o g l e - a p i - c o r e = = 2 . 2 1 . 0 
+ 
+ g o o g l e - a p i - p y t h o n - c l i e n t = = 2 . 1 4 9 . 0 
+ 
+ g o o g l e - a u t h = = 2 . 3 5 . 0 
+ 
+ g o o g l e - a u t h - h t t p l i b 2 = = 0 . 2 . 0 
+ 
+ g o o g l e - c l o u d - c o r e = = 2 . 4 . 1 
+ 
+ g o o g l e - c l o u d - f i r e s t o r e = = 2 . 1 9 . 0 
+ 
+ g o o g l e - c l o u d - s t o r a g e = = 2 . 1 8 . 2 
+ 
+ g o o g l e - c r c 3 2 c = = 1 . 6 . 0 
+ 
+ g o o g l e - e v e n t s = = 0 . 1 3 . 0 
+ 
+ g o o g l e - p a s t a = = 0 . 2 . 0 
+ 
+ g o o g l e - r e s u m a b l e - m e d i a = = 2 . 7 . 2 
+ 
+ g o o g l e a p i s - c o m m o n - p r o t o s = = 1 . 6 5 . 0 
+ 
+ g o t r u e = = 2 . 1 1 . 0 
+ 
+ g r a d i o = = 5 . 5 . 0 
+ 
+ g r a d i o _ c l i e n t = = 1 . 4 . 2 
+ 
+ g r e e n l e t = = 3 . 0 . 3 
+ 
+ g r p c i o = = 1 . 6 6 . 2 
+ 
+ g r p c i o - s t a t u s = = 1 . 6 6 . 2 
+ 
+ g u n i c o r n = = 2 3 . 0 . 0 
+ 
+ h 1 1 = = 0 . 1 4 . 0 
+ 
+ h 2 = = 4 . 1 . 0 
+ 
+ h 5 p y = = 3 . 1 0 . 0 
+ 
+ H e a p D i c t   @   f i l e : / / / U s e r s / k t i e t z / d e m o / m c 3 / c o n d a - b l d / h e a p d i c t _ 1 6 3 0 5 9 8 5 1 5 7 1 4 / w o r k 
+ 
+ h o l o v i e w s   @   f i l e : / / / C : / b / a b s _ a 4 v 1 z c m v b 9 / c r o o t / h o l o v i e w s _ 1 7 1 8 2 9 5 3 3 9 5 5 9 / w o r k 
+ 
+ h p a c k = = 4 . 0 . 0 
+ 
+ h t t p c o r e = = 1 . 0 . 6 
+ 
+ h t t p l i b 2 = = 0 . 2 2 . 0 
+ 
+ h t t p x = = 0 . 2 7 . 2 
+ 
+ h t t p x - s s e = = 0 . 4 . 0 
+ 
+ h u g g i n g f a c e - h u b = = 0 . 2 6 . 2 
+ 
+ h v p l o t   @   f i l e : / / / C : / b / a b s _ d 0 1 w n x a m c 3 / c r o o t / h v p l o t _ 1 7 1 5 0 9 0 4 5 6 8 0 3 / w o r k 
+ 
+ h y p e r f r a m e = = 6 . 0 . 1 
+ 
+ h y p e r l i n k   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / h y p e r l i n k _ 1 6 1 0 1 3 0 7 4 6 8 3 7 / w o r k 
+ 
+ i d n a = = 3 . 4 
+ 
+ i m a g e c o d e c s   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / i m a g e c o d e c s _ 1 6 9 9 4 8 1 4 9 8 7 8 7 / w o r k 
+ 
+ i m a g e i o = = 2 . 3 4 . 1 
+ 
+ i m a g e s i z e   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / i m a g e s i z e _ 1 6 9 9 4 7 6 3 4 1 9 2 4 / w o r k 
+ 
+ i m b a l a n c e d - l e a r n   @   f i l e : / / / C : / b / a b s _ 4 3 z x 1 1 b 5 e x / c r o o t / i m b a l a n c e d - l e a r n _ 1 7 1 8 1 3 2 2 4 3 9 5 6 / w o r k 
+ 
+ i m p o r t l i b - m e t a d a t a = = 6 . 1 1 . 0 
+ 
+ i n c r e m e n t a l   @   f i l e : / / / c r o o t / i n c r e m e n t a l _ 1 7 0 8 6 3 9 9 3 8 2 9 9 / w o r k 
+ 
+ i n f l e c t i o n   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / i n f l e c t i o n _ 1 6 9 9 5 0 0 9 7 4 2 5 8 / w o r k 
+ 
+ i n i c o n f i g   @   f i l e : / / / h o m e / l i n u x 1 / r e c i p e s / c i / i n i c o n f i g _ 1 6 1 0 9 8 3 0 1 9 6 7 7 / w o r k 
+ 
+ i n t a k e   @   f i l e : / / / C : / b / a b s _ 1 5 s g 4 6 u 7 x 7 / c r o o t / i n t a k e _ 1 7 1 7 5 1 3 8 2 7 1 3 8 / w o r k 
+ 
+ i n t e l - o p e n m p = = 2 0 2 1 . 4 . 0 
+ 
+ i n t e r v a l t r e e   @   f i l e : / / / U s e r s / k t i e t z / d e m o / m c 3 / c o n d a - b l d / i n t e r v a l t r e e _ 1 6 3 0 5 1 1 8 8 9 6 6 4 / w o r k 
+ 
+ i p y k e r n e l = = 6 . 2 7 . 1 
+ 
+ i p y t h o n = = 8 . 1 8 . 1 
+ 
+ i p y t h o n - g e n u t i l s   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / i p y t h o n _ g e n u t i l s _ 1 6 0 6 7 7 3 4 3 9 8 2 6 / w o r k 
+ 
+ i p y w i d g e t s   @   f i l e : / / / C : / b / a b s _ 4 f g m e p z m b u / c r o o t / i p y w i d g e t s _ 1 7 1 0 9 6 1 5 5 6 9 1 3 / w o r k 
+ 
+ i s o r t   @   f i l e : / / / C : / b / a b s _ 5 0 i y 8 4 0 e 4 z / c r o o t / i s o r t _ 1 7 1 8 2 9 1 8 4 9 2 0 0 / w o r k 
+ 
+ i t e m a d a p t e r   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / i t e m a d a p t e r _ 1 6 2 6 4 4 2 9 4 0 6 3 2 / w o r k 
+ 
+ i t e m l o a d e r s   @   f i l e : / / / C : / b / a b s _ 5 e 3 a z g v 2 5 z / c r o o t / i t e m l o a d e r s _ 1 7 0 8 6 3 9 9 9 3 4 4 2 / w o r k 
+ 
+ i t s d a n g e r o u s   @   f i l e : / / / C : / b / a b s _ c 4 v w g d r 5 y n / c r o o t / i t s d a n g e r o u s _ 1 7 1 6 5 3 3 3 9 9 9 1 4 / w o r k 
+ 
+ j a r a c o . c l a s s e s   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / j a r a c o . c l a s s e s _ 1 6 2 0 9 8 3 1 7 9 3 7 9 / w o r k 
+ 
+ j e d i = = 0 . 1 9 . 1 
+ 
+ j e l l y f i s h   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / j e l l y f i s h _ 1 6 9 9 5 5 8 1 1 6 6 0 1 / w o r k 
+ 
+ J i n j a 2 = = 3 . 1 . 3 
+ 
+ j i t e r = = 0 . 7 . 1 
+ 
+ j m e s p a t h = = 1 . 0 . 1 
+ 
+ j o b l i b = = 1 . 4 . 2 
+ 
+ j s o n 5   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / j s o n 5 _ 1 6 2 4 4 3 2 7 7 0 1 2 2 / w o r k 
+ 
+ j s o n p a t c h   @   f i l e : / / / C : / b / a b s _ 4 f d m 8 8 t 7 z i / c r o o t / j s o n p a t c h _ 1 7 1 4 4 8 3 9 7 4 5 7 8 / w o r k 
+ 
+ j s o n p o i n t e r = = 2 . 1 
+ 
+ j s o n s c h e m a = = 4 . 2 1 . 1 
+ 
+ j s o n s c h e m a - s p e c i f i c a t i o n s = = 2 0 2 3 . 1 2 . 1 
+ 
+ j u p y t e r   @   f i l e : / / / C : / b / a b s _ 0 3 n m 7 x r h x z / c r o o t / j u p y t e r _ 1 7 0 9 8 3 7 2 3 9 9 4 0 / w o r k 
+ 
+ j u p y t e r - c o n s o l e   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / j u p y t e r _ c o n s o l e _ 1 7 0 7 4 3 0 1 4 8 5 1 5 / w o r k 
+ 
+ j u p y t e r - e v e n t s   @   f i l e : / / / C : / b / a b s _ c 2 m 9 s 5 b 5 m 5 / c r o o t / j u p y t e r _ e v e n t s _ 1 7 1 8 7 3 8 1 1 5 2 5 4 / w o r k 
+ 
+ j u p y t e r - l s p   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / j u p y t e r - l s p - m e t a _ 1 7 0 1 8 0 6 5 2 8 2 8 6 / w o r k 
+ 
+ j u p y t e r _ c l i e n t = = 8 . 6 . 0 
+ 
+ j u p y t e r _ c o r e = = 5 . 5 . 0 
+ 
+ j u p y t e r _ s e r v e r   @   f i l e : / / / C : / b / a b s _ 9 a 3 3 3 n h 6 y u / c r o o t / j u p y t e r _ s e r v e r _ 1 7 1 8 8 2 7 0 9 2 2 2 3 / w o r k 
+ 
+ j u p y t e r _ s e r v e r _ t e r m i n a l s   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / j u p y t e r _ s e r v e r _ t e r m i n a l s _ 1 7 0 1 7 9 8 0 4 1 6 3 5 / w o r k 
+ 
+ j u p y t e r l a b   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / j u p y t e r l a b _ 1 7 0 9 1 5 7 3 8 3 3 5 8 / w o r k 
+ 
+ j u p y t e r l a b - p y g m e n t s   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / j u p y t e r l a b _ p y g m e n t s _ 1 6 0 1 4 9 0 7 2 0 6 0 2 / w o r k 
+ 
+ j u p y t e r l a b - w i d g e t s   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / j u p y t e r l a b _ w i d g e t s _ 1 6 0 9 8 8 4 3 4 1 2 3 1 / w o r k 
+ 
+ j u p y t e r l a b _ s e r v e r   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / j u p y t e r l a b _ s e r v e r _ 1 7 0 1 8 0 6 5 6 3 4 0 1 / w o r k 
+ 
+ k e r a s = = 3 . 1 . 1 
+ 
+ k e y r i n g   @   f i l e : / / / C : / b / a b s _ 7 8 u o j 9 s w 0 0 / c r o o t / k e y r i n g _ 1 7 0 9 6 3 2 5 5 0 1 8 0 / w o r k 
+ 
+ k i w i s o l v e r = = 1 . 4 . 5 
+ 
+ l a n g c h a i n = = 0 . 3 . 7 
+ 
+ l a n g c h a i n - c o m m u n i t y = = 0 . 3 . 7 
+ 
+ l a n g c h a i n - c o r e = = 0 . 3 . 1 7 
+ 
+ l a n g c h a i n - o l l a m a = = 0 . 2 . 0 
+ 
+ l a n g c h a i n - o p e n a i = = 0 . 2 . 9 
+ 
+ l a n g c h a i n - t e x t - s p l i t t e r s = = 0 . 3 . 2 
+ 
+ l a n g s m i t h = = 0 . 1 . 1 4 2 
+ 
+ l a z y - o b j e c t - p r o x y   @   f i l e : / / / C : / b / a b s _ 1 9 t d _ n z b 6 n / c r o o t / l a z y - o b j e c t - p r o x y _ 1 7 1 2 9 0 8 7 3 5 0 7 0 / w o r k 
+ 
+ l a z y _ l o a d e r = = 0 . 4 
+ 
+ l c k r _ j u p y t e r l a b _ v a r i a b l e i n s p e c t o r   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / j u p y t e r l a b - v a r i a b l e i n s p e c t o r _ 1 7 0 9 1 6 7 2 0 1 4 7 7 / w o r k 
+ 
+ l i b a r c h i v e - c   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / p y t h o n - l i b a r c h i v e - c _ 1 6 1 7 7 8 0 4 8 6 9 4 5 / w o r k 
+ 
+ l i b c l a n g = = 1 8 . 1 . 1 
+ 
+ l i b m a m b a p y   @   f i l e : / / / C : / b / a b s _ 8 9 s u v 9 z w k z / c r o o t / m a m b a - s p l i t _ 1 7 1 4 4 8 4 5 1 2 4 2 8 / w o r k / l i b m a m b a p y 
+ 
+ l i n k i f y - i t - p y   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / l i n k i f y - i t - p y _ 1 6 9 9 5 5 8 9 5 7 4 1 1 / w o r k 
+ 
+ l l a m a - c l o u d = = 0 . 1 . 5 
+ 
+ l l a m a - i n d e x = = 0 . 1 1 . 2 3 
+ 
+ l l a m a - i n d e x - a g e n t - o p e n a i = = 0 . 3 . 4 
+ 
+ l l a m a - i n d e x - c l i = = 0 . 3 . 1 
+ 
+ l l a m a - i n d e x - c o r e = = 0 . 1 1 . 2 3 
+ 
+ l l a m a - i n d e x - e m b e d d i n g s - o p e n a i = = 0 . 2 . 5 
+ 
+ l l a m a - i n d e x - i n d i c e s - m a n a g e d - l l a m a - c l o u d = = 0 . 4 . 2 
+ 
+ l l a m a - i n d e x - l e g a c y = = 0 . 9 . 4 8 . p o s t 4 
+ 
+ l l a m a - i n d e x - l l m s - o p e n a i = = 0 . 2 . 1 6 
+ 
+ l l a m a - i n d e x - m u l t i - m o d a l - l l m s - o p e n a i = = 0 . 2 . 3 
+ 
+ l l a m a - i n d e x - p r o g r a m - o p e n a i = = 0 . 2 . 0 
+ 
+ l l a m a - i n d e x - q u e s t i o n - g e n - o p e n a i = = 0 . 2 . 0 
+ 
+ l l a m a - i n d e x - r e a d e r s - f i l e = = 0 . 3 . 0 
+ 
+ l l a m a - i n d e x - r e a d e r s - l l a m a - p a r s e = = 0 . 3 . 0 
+ 
+ l l a m a - p a r s e = = 0 . 5 . 1 4 
+ 
+ l l v m l i t e   @   f i l e : / / / C : / b / a b s _ d a 1 5 r 8 v k f 8 / c r o o t / l l v m l i t e _ 1 7 0 6 9 1 0 7 7 9 9 9 4 / w o r k 
+ 
+ l m d b   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p y t h o n - l m d b _ 1 6 9 9 4 9 5 8 8 8 6 3 0 / w o r k 
+ 
+ l o c k e t   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / l o c k e t _ 1 6 9 9 4 7 6 5 0 8 0 1 4 / w o r k 
+ 
+ l o g g e r = = 1 . 4 
+ 
+ l x m l   @   f i l e : / / / C : / b / a b s _ 0 b y i 7 j a j p h / c r o o t / l x m l _ 1 7 1 5 2 8 9 5 2 1 2 0 1 / w o r k 
+ 
+ l z 4   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / l z 4 _ 1 6 9 9 5 5 9 5 3 2 2 6 8 / w o r k 
+ 
+ m a n g u m = = 0 . 1 9 . 0 
+ 
+ M a r k d o w n = = 3 . 6 
+ 
+ m a r k d o w n - i t - p y = = 3 . 0 . 0 
+ 
+ M a r k u p S a f e = = 2 . 1 . 5 
+ 
+ m a r s h m a l l o w = = 3 . 2 3 . 1 
+ 
+ m a t p l o t l i b = = 3 . 9 . 0 
+ 
+ m a t p l o t l i b - i n l i n e = = 0 . 1 . 6 
+ 
+ m c c a b e   @   f i l e : / / / o p t / c o n d a / c o n d a - b l d / m c c a b e _ 1 6 4 4 2 2 1 7 4 1 7 2 1 / w o r k 
+ 
+ m d i t - p y - p l u g i n s   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / m d i t - p y - p l u g i n s _ 1 6 9 9 5 5 9 7 8 8 3 8 9 / w o r k 
+ 
+ m d u r l = = 0 . 1 . 2 
+ 
+ m e n u i n s t   @   f i l e : / / / C : / b / a b s _ e 7 z s r w v o y 0 / c r o o t / m e n u i n s t _ 1 7 1 8 1 3 2 5 4 6 1 5 0 / w o r k 
+ 
+ m i s t u n e   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / m i s t u n e _ 1 6 9 9 5 5 9 9 2 3 7 0 4 / w o r k 
+ 
+ m k l = = 2 0 2 1 . 4 . 0 
+ 
+ m k l - f f t   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / m k l _ f f t _ 1 6 9 9 4 7 3 5 2 8 4 8 0 / w o r k 
+ 
+ m k l - r a n d o m   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / m k l _ r a n d o m _ 1 6 9 9 4 7 3 5 8 8 2 5 0 / w o r k 
+ 
+ m k l - s e r v i c e = = 2 . 4 . 0 
+ 
+ m l - d t y p e s = = 0 . 3 . 2 
+ 
+ - e   g i t + h t t p s : / / g i t h u b . c o m / T h e D r e a m e d / M L _ P r o j e c t _ W i t h _ D e p l o y m e n t . g i t @ 0 4 c d 3 f a 1 2 7 9 d 9 0 5 4 8 5 b 5 4 4 5 1 5 9 b 3 3 4 8 b 5 7 3 2 3 b e 0 # e g g = m l p r o j e c t 
+ 
+ m o r e - i t e r t o o l s   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / m o r e - i t e r t o o l s _ 1 7 0 1 8 1 1 5 8 9 4 2 1 / w o r k 
+ 
+ m p i 4 p y = = 4 . 0 . 1 
+ 
+ m p m a t h = = 1 . 3 . 0 
+ 
+ m s g p a c k   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / m s g p a c k - p y t h o n _ 1 6 9 9 4 7 3 9 2 4 8 7 2 / w o r k 
+ 
+ m u l t i d i c t = = 6 . 0 . 5 
+ 
+ m u l t i p l e d i s p a t c h   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / m u l t i p l e d i s p a t c h _ 1 6 9 9 4 7 3 9 5 1 9 7 4 / w o r k 
+ 
+ m u l t i p r o c e s s = = 0 . 7 0 . 1 6 
+ 
+ m y p y   @   f i l e : / / / C : / b / a b s _ 6 6 q g a e 7 a g v / c r o o t / m y p y - s p l i t _ 1 7 1 8 0 0 8 4 7 3 9 4 0 / w o r k 
+ 
+ m y p y - e x t e n s i o n s   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / m y p y _ e x t e n s i o n s _ 1 6 9 9 4 8 2 6 3 4 5 1 6 / w o r k 
+ 
+ n a m e x = = 0 . 0 . 7 
+ 
+ n a v i g a t o r - u p d a t e r   @   f i l e : / / / C : / b / a b s _ 2 2 _ 3 u a q 2 e y / c r o o t / n a v i g a t o r - u p d a t e r _ 1 7 1 8 0 3 0 4 0 5 0 2 3 / w o r k 
+ 
+ n b c l i e n t   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / n b c l i e n t _ 1 7 0 1 7 9 6 7 5 2 2 3 6 / w o r k 
+ 
+ n b c o n v e r t   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / n b c o n v e r t _ 1 7 0 1 8 0 6 2 7 9 8 8 4 / w o r k 
+ 
+ n b f o r m a t   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / n b f o r m a t _ 1 7 0 1 7 9 6 7 0 4 1 1 8 / w o r k 
+ 
+ n e s t - a s y n c i o = = 1 . 5 . 8 
+ 
+ n e t w o r k x = = 3 . 3 
+ 
+ n l t k = = 3 . 9 . 1 
+ 
+ n o t e b o o k   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / n o t e b o o k _ 1 7 0 9 1 5 7 8 1 1 0 3 3 / w o r k 
+ 
+ n o t e b o o k _ s h i m   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / n o t e b o o k - s h i m _ 1 7 0 1 8 0 6 5 9 2 3 2 2 / w o r k 
+ 
+ n u m b a   @   f i l e : / / / C : / b / a b s _ 3 d 6 x 7 o _ c s g / c r o o t / n u m b a _ 1 7 1 2 0 0 6 6 7 2 4 0 8 / w o r k 
+ 
+ n u m e x p r   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / n u m e x p r _ 1 6 9 9 5 0 3 4 2 1 2 6 4 / w o r k 
+ 
+ n u m p y = = 1 . 2 6 . 2 
+ 
+ n u m p y d o c   @   f i l e : / / / C : / b / a b s _ b b s p p 5 l 8 v u / c r o o t / n u m p y d o c _ 1 7 1 8 2 7 9 1 8 5 5 7 3 / w o r k 
+ 
+ o l l a m a = = 0 . 3 . 3 
+ 
+ o p e n a i = = 1 . 5 5 . 1 
+ 
+ o p e n c v - p y t h o n = = 4 . 1 0 . 0 . 8 4 
+ 
+ o p e n c v - p y t h o n - h e a d l e s s = = 4 . 1 0 . 0 . 8 4 
+ 
+ o p e n p y x l   @   f i l e : / / / C : / b / a b s _ 7 6 4 b r j a d j 1 / c r o o t / o p e n p y x l _ 1 7 1 4 1 5 8 8 9 5 8 7 3 / w o r k 
+ 
+ o p t - e i n s u m = = 3 . 3 . 0 
+ 
+ o p t i o n a l = = 0 . 0 . 1 
+ 
+ o p t r e e = = 0 . 1 0 . 0 
+ 
+ o r j s o n = = 3 . 1 0 . 1 1 
+ 
+ o v e r r i d e s   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / o v e r r i d e s _ 1 7 0 1 8 0 6 3 3 6 5 0 3 / w o r k 
+ 
+ p a c k a g i n g = = 2 3 . 2 
+ 
+ p a n d a s = = 2 . 2 . 1 
+ 
+ p a n d o c f i l t e r s   @   f i l e : / / / o p t / c o n d a / c o n d a - b l d / p a n d o c f i l t e r s _ 1 6 4 3 4 0 5 4 5 5 9 8 0 / w o r k 
+ 
+ p a n e l   @   f i l e : / / / C : / b / a b s _ a a _ 7 b c h s t 1 / c r o o t / p a n e l _ 1 7 1 8 1 1 9 0 3 4 2 7 9 / w o r k 
+ 
+ p a r a m   @   f i l e : / / / C : / b / a b s _ 5 2 u 4 g p l v t g / c r o o t / p a r a m _ 1 7 1 1 1 3 6 8 6 7 3 6 9 / w o r k 
+ 
+ p a r a m i k o   @   f i l e : / / / o p t / c o n d a / c o n d a - b l d / p a r a m i k o _ 1 6 4 0 1 0 9 0 3 2 7 5 5 / w o r k 
+ 
+ p a r s e l   @   f i l e : / / / C : / b / a b s _ e b c 3 t z m _ c 4 / c r o o t / p a r s e l _ 1 7 0 7 5 0 3 5 1 7 5 9 6 / w o r k 
+ 
+ p a r s o = = 0 . 8 . 3 
+ 
+ p a r t d   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p a r t d _ 1 6 9 9 4 8 2 6 6 1 6 0 3 / w o r k 
+ 
+ p a t h o s = = 0 . 3 . 2 
+ 
+ p a t h s p e c   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p a t h s p e c _ 1 6 9 9 4 7 2 4 8 1 0 6 8 / w o r k 
+ 
+ p a t s y   @   f i l e : / / / C : / b / a b s _ 2 1 h y _ w y j 1 3 / c r o o t / p a t s y _ 1 7 1 8 3 7 8 1 8 4 3 7 9 / w o r k 
+ 
+ p e x p e c t   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / p e x p e c t _ 1 6 0 5 5 6 3 2 0 9 0 0 8 / w o r k 
+ 
+ p g 8 0 0 0 = = 1 . 3 1 . 2 
+ 
+ p i c k l e s h a r e   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / p i c k l e s h a r e _ 1 6 0 6 9 3 2 0 4 0 7 2 4 / w o r k 
+ 
+ p i l l o w   @   f i l e : / / / C : / b / a b s _ 9 5 l s _ q h 4 c 2 / c r o o t / p i l l o w _ 1 7 1 4 3 9 8 8 7 0 6 1 5 / w o r k 
+ 
+ p k c e   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p k c e _ 1 6 9 9 4 8 2 7 1 8 9 0 5 / w o r k 
+ 
+ p k g i n f o   @   f i l e : / / / C : / b / a b s _ b c i y p a l 1 7 m / c r o o t / p k g i n f o _ 1 7 1 5 6 9 6 0 2 7 8 3 9 / w o r k 
+ 
+ p l a t f o r m d i r s = = 4 . 0 . 0 
+ 
+ p l o t l y   @   f i l e : / / / C : / b / a b s _ 9 a s y l 7 5 6 0 v / c r o o t / p l o t l y _ 1 7 1 8 1 3 6 9 4 9 9 2 9 / w o r k 
+ 
+ p l u g g y   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p l u g g y _ 1 6 9 9 4 7 2 5 0 4 1 1 7 / w o r k 
+ 
+ p l y   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p l y _ 1 6 9 9 4 7 3 9 9 9 8 7 1 / w o r k 
+ 
+ p o s t g r e s t = = 0 . 1 8 . 0 
+ 
+ p o x = = 0 . 3 . 4 
+ 
+ p p f t = = 1 . 7 . 6 . 8 
+ 
+ p r o m e t h e u s - c l i e n t   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p r o m e t h e u s _ c l i e n t _ 1 6 9 9 4 9 5 4 9 6 6 6 9 / w o r k 
+ 
+ p r o m p t - t o o l k i t = = 3 . 0 . 4 1 
+ 
+ p r o p c a c h e = = 0 . 2 . 0 
+ 
+ P r o t e g o   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / p r o t e g o _ 1 5 9 8 6 5 7 1 8 0 8 2 7 / w o r k 
+ 
+ p r o t o - p l u s = = 1 . 2 4 . 0 
+ 
+ p r o t o b u f = = 5 . 2 9 . 1 
+ 
+ p s u t i l = = 5 . 9 . 6 
+ 
+ p s y c o p g 2 = = 2 . 9 . 9 
+ 
+ p s y c o p g 2 - b i n a r y = = 2 . 9 . 9 
+ 
+ p t y p r o c e s s   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / p t y p r o c e s s _ 1 6 0 9 3 5 5 0 0 6 1 1 8 / w o r k / d i s t / p t y p r o c e s s - 0 . 7 . 0 - p y 2 . p y 3 - n o n e - a n y . w h l 
+ 
+ p u r e - e v a l = = 0 . 2 . 2 
+ 
+ p y - c p u i n f o   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p y - c p u i n f o _ 1 6 9 9 4 9 5 5 6 7 1 4 7 / w o r k 
+ 
+ p y a r r o w = = 1 6 . 0 . 0 
+ 
+ p y a s n 1   @   f i l e : / / / U s e r s / k t i e t z / d e m o / m c 3 / c o n d a - b l d / p y a s n 1 _ 1 6 2 9 7 0 8 0 0 7 3 8 5 / w o r k 
+ 
+ p y a s n 1 - m o d u l e s = = 0 . 2 . 8 
+ 
+ p y c o d e s t y l e   @   f i l e : / / / C : / b / a b s _ e 9 p t 4 m a h c t / c r o o t / p y c o d e s t y l e _ 1 7 0 1 9 1 0 6 4 3 1 3 9 / w o r k 
+ 
+ p y c o s a t   @   f i l e : / / / C : / b / a b s _ 5 c s d e r n _ _ _ / c r o o t / p y c o s a t _ 1 7 1 4 5 1 3 1 0 2 9 2 3 / w o r k 
+ 
+ p y c p a r s e r   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / p y c p a r s e r _ 1 6 3 6 5 4 1 3 5 2 0 3 4 / w o r k 
+ 
+ p y c t   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p y c t _ 1 6 9 9 5 4 2 9 8 8 8 5 7 / w o r k 
+ 
+ p y c u r l = = 7 . 4 5 . 2 
+ 
+ p y d a n t i c = = 2 . 9 . 2 
+ 
+ p y d a n t i c - s e t t i n g s = = 2 . 6 . 1 
+ 
+ p y d a n t i c _ c o r e = = 2 . 2 3 . 4 
+ 
+ p y d e c k = = 0 . 9 . 0 b 1 
+ 
+ P y D i s p a t c h e r   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p y d i s p a t c h e r _ 1 6 9 9 5 4 3 0 3 3 4 3 4 / w o r k 
+ 
+ p y d o c s t y l e   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p y d o c s t y l e _ 1 6 9 9 4 9 5 6 1 1 0 0 4 / w o r k 
+ 
+ p y d u b = = 0 . 2 5 . 1 
+ 
+ p y e r f a   @   f i l e : / / / C : / b / a b s _ 4 7 7 f i v s f e 8 / c r o o t / p y e r f a _ 1 7 1 7 7 0 0 7 6 8 1 7 2 / w o r k 
+ 
+ p y f l a k e s   @   f i l e : / / / C : / b / a b s _ b 6 t 1 a a z q 2 e / c r o o t / p y f l a k e s _ 1 7 0 8 9 6 3 0 2 0 9 0 7 / w o r k 
+ 
+ P y g m e n t s = = 2 . 1 7 . 2 
+ 
+ P y J W T   @   f i l e : / / / C : / b / a b s _ 0 4 q h g o 7 5 w z / c r o o t / p y j w t _ 1 7 1 5 0 9 5 1 1 9 6 8 5 / w o r k 
+ 
+ p y l i n t   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p y l i n t _ 1 6 9 9 4 9 5 6 8 9 8 0 6 / w o r k 
+ 
+ p y l i n t - v e n v   @   f i l e : / / / C : / b / a b s _ 3 f 6 p _ 1 7 z i a / c r o o t / p y l i n t - v e n v _ 1 7 0 9 8 3 7 6 8 0 3 0 9 / w o r k 
+ 
+ p y l s - s p y d e r = = 0 . 4 . 0 
+ 
+ P y N a C l   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p y n a c l _ 1 6 9 9 5 6 3 0 7 7 2 1 2 / w o r k 
+ 
+ p y o d b c   @   f i l e : / / / C : / b / a b s _ 9 0 k l y 0 u u w z / c r o o t / p y o d b c _ 1 7 0 5 4 3 1 3 9 6 5 4 8 / w o r k 
+ 
+ p y O p e n S S L   @   f i l e : / / / C : / b / a b s _ 5 4 4 9 d i t k 1 2 / c r o o t / p y o p e n s s l _ 1 7 0 8 3 8 6 2 4 5 8 9 6 / w o r k 
+ 
+ p y p a r s i n g = = 3 . 1 . 2 
+ 
+ p y p d f = = 5 . 1 . 0 
+ 
+ P y Q t 5 = = 5 . 1 5 . 1 0 
+ 
+ P y Q t 5 - s i p   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p y q t - s p l i t _ 1 6 9 9 4 7 8 6 6 9 2 9 0 / w o r k / p y q t _ s i p 
+ 
+ P y Q t W e b E n g i n e = = 5 . 1 5 . 6 
+ 
+ P y S o c k s   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p y s o c k s _ 1 6 9 9 4 7 3 3 3 6 1 8 8 / w o r k 
+ 
+ p y t e s t   @   f i l e : / / / C : / b / a b s _ e e n _ 3 z 7 4 7 j / c r o o t / p y t e s t _ 1 7 1 7 7 9 3 2 5 3 6 7 0 / w o r k 
+ 
+ p y t h o n - d a t e u t i l = = 2 . 8 . 2 
+ 
+ p y t h o n - d o t e n v   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p y t h o n - d o t e n v _ 1 6 9 9 4 7 5 0 9 7 7 2 8 / w o r k 
+ 
+ p y t h o n - j s o n - l o g g e r   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p y t h o n - j s o n - l o g g e r _ 1 6 9 9 5 4 3 6 2 6 7 5 9 / w o r k 
+ 
+ p y t h o n - l s p - b l a c k   @   f i l e : / / / C : / b / a b s _ 5 d h e n _ 5 v g a / c r o o t / p y t h o n - l s p - b l a c k _ 1 7 0 9 2 3 2 9 6 2 5 8 9 / w o r k 
+ 
+ p y t h o n - l s p - j s o n r p c   @   f i l e : / / / c r o o t / p y t h o n - l s p - j s o n r p c _ 1 7 0 8 9 6 2 8 7 2 5 5 6 / w o r k 
+ 
+ p y t h o n - l s p - s e r v e r   @   f i l e : / / / C : / b / a b s _ 2 c d y z v c q 4 z / c r o o t / p y t h o n - l s p - s e r v e r _ 1 7 0 8 9 7 1 7 9 6 9 7 5 / w o r k 
+ 
+ p y t h o n - m u l t i p a r t = = 0 . 0 . 1 2 
+ 
+ p y t h o n - s l u g i f y   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / p y t h o n - s l u g i f y _ 1 6 2 0 4 0 5 6 6 9 6 3 6 / w o r k 
+ 
+ p y t h o n - s n a p p y   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p y t h o n - s n a p p y _ 1 6 9 9 5 6 4 9 3 9 8 8 0 / w o r k 
+ 
+ p y t o o l c o n f i g   @   f i l e : / / / C : / b / a b s _ f 2 j _ x s v r p n / c r o o t / p y t o o l c o n f i g _ 1 7 0 1 7 2 8 7 5 1 2 0 7 / w o r k 
+ 
+ p y t z = = 2 0 2 4 . 1 
+ 
+ p y v i z _ c o m m s   @   f i l e : / / / C : / b / a b s _ 6 7 4 g f m q o x a / c r o o t / p y v i z _ c o m m s _ 1 7 1 1 1 3 6 8 7 2 8 5 3 / w o r k 
+ 
+ p y w a v e l e t s   @   f i l e : / / / C : / b / a b s _ 7 e s t 3 8 6 x s b / c r o o t / p y w a v e l e t s _ 1 7 0 5 0 4 9 8 5 5 8 7 9 / w o r k 
+ 
+ p y w i n 3 2 = = 3 0 6 
+ 
+ p y w i n 3 2 - c t y p e s   @   f i l e : / / / C : / b / a b s _ 2 c f x 5 l 4 n v i / c r o o t / p y w i n 3 2 - c t y p e s _ 1 7 0 9 3 4 0 2 4 6 0 9 2 / w o r k 
+ 
+ p y w i n p t y   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / p y w i n p t y _ 1 6 9 9 4 9 6 0 1 0 5 5 7 / w o r k / t a r g e t / w h e e l s / p y w i n p t y - 2 . 0 . 1 0 - c p 3 1 2 - n o n e - w i n _ a m d 6 4 . w h l # s h a 2 5 6 = 2 2 7 f 3 f 9 4 f 5 6 8 f 6 3 a b 3 4 1 8 c 0 2 8 7 5 c 4 b 4 2 9 a 0 a 3 6 3 8 e 1 a 2 9 1 7 a 2 2 b b 8 e 4 b a 1 7 6 2 1 7 9 
+ 
+ P y Y A M L = = 6 . 0 . 1 
+ 
+ p y z m q = = 2 5 . 1 . 1 
+ 
+ Q D a r k S t y l e   @   f i l e : / / / c r o o t / q d a r k s t y l e _ 1 7 0 9 2 3 1 0 0 3 5 5 1 / w o r k 
+ 
+ q s t y l i z e r   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / q s t y l i z e r _ 1 6 9 9 5 6 5 3 3 8 3 4 1 / w o r k / d i s t / q s t y l i z e r - 0 . 2 . 2 - p y 2 . p y 3 - n o n e - a n y . w h l # s h a 2 5 6 = b e 2 f 7 d 9 5 6 d 8 9 7 1 0 f 1 3 d e e 8 0 f 2 d 5 9 4 e 7 9 4 c 2 7 1 0 f 1 2 5 7 6 f e 6 0 e c e e 8 4 d d 1 a d 7 2 1 8 0 
+ 
+ Q t A w e s o m e   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / q t a w e s o m e _ 1 6 9 9 5 6 5 3 8 0 1 0 6 / w o r k 
+ 
+ q t c o n s o l e   @   f i l e : / / / C : / b / a b s _ 0 3 f 8 r g 9 v l 6 / c r o o t / q t c o n s o l e _ 1 7 0 9 2 3 1 2 1 8 0 6 9 / w o r k 
+ 
+ Q t P y   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / q t p y _ 1 7 0 1 8 0 7 1 9 8 5 1 4 / w o r k 
+ 
+ q u e u e l i b   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / q u e u e l i b _ 1 6 9 9 5 4 3 8 5 8 8 2 9 / w o r k 
+ 
+ r e a l t i m e = = 2 . 0 . 6 
+ 
+ r e f e r e n c i n g = = 0 . 3 5 . 0 
+ 
+ r e g e x   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / r e g e x _ 1 6 9 9 4 8 3 1 3 4 5 9 9 / w o r k 
+ 
+ r e q u e s t s   @   f i l e : / / / C : / b / a b s _ 9 c 5 n 2 4 p 1 y 7 / c r o o t / r e q u e s t s _ 1 7 1 6 9 0 2 8 6 7 6 3 9 / w o r k 
+ 
+ r e q u e s t s - f i l e   @   f i l e : / / / U s e r s / k t i e t z / d e m o / m c 3 / c o n d a - b l d / r e q u e s t s - f i l e _ 1 6 2 9 4 5 5 7 8 1 9 8 6 / w o r k 
+ 
+ r e q u e s t s - t o o l b e l t   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / r e q u e s t s - t o o l b e l t _ 1 6 9 9 4 7 5 4 6 6 7 7 5 / w o r k 
+ 
+ r f c 3 3 3 9 - v a l i d a t o r   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / r f c 3 3 3 9 - v a l i d a t o r _ 1 6 9 9 5 4 3 9 2 4 9 9 1 / w o r k 
+ 
+ r f c 3 9 8 6 - v a l i d a t o r   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / r f c 3 9 8 6 - v a l i d a t o r _ 1 6 9 9 5 4 3 9 5 5 6 5 1 / w o r k 
+ 
+ r i c h = = 1 3 . 7 . 1 
+ 
+ r o p e   @   f i l e : / / / C : / b / a b s _ a 4 u y 0 n u c 8 z / c r o o t / r o p e _ 1 7 0 8 9 6 3 2 1 7 0 2 6 / w o r k 
+ 
+ r p d s - p y = = 0 . 1 8 . 0 
+ 
+ r s a = = 4 . 9 
+ 
+ R t r e e   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / r t r e e _ 1 6 9 9 5 6 5 7 5 1 7 5 5 / w o r k 
+ 
+ r u a m e l - y a m l - c o n d a   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / r u a m e l _ y a m l _ 1 6 9 9 5 4 3 9 9 0 0 3 2 / w o r k 
+ 
+ r u a m e l . y a m l   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / r u a m e l . y a m l _ 1 6 9 9 4 8 3 1 8 4 3 2 4 / w o r k 
+ 
+ r u f f = = 0 . 7 . 3 
+ 
+ s 3 f s   @   f i l e : / / / C : / b / a b s _ 9 7 2 c x n i 1 l b / c r o o t / s 3 f s _ 1 7 1 4 4 6 6 0 9 0 1 4 4 / w o r k 
+ 
+ s 3 t r a n s f e r = = 0 . 1 0 . 2 
+ 
+ s a f e h t t p x = = 0 . 1 . 1 
+ 
+ s a f e t e n s o r s = = 0 . 4 . 5 
+ 
+ s a g e m a k e r = = 2 . 2 2 5 . 0 
+ 
+ s c h e m a = = 0 . 7 . 7 
+ 
+ s c i k i t - i m a g e = = 0 . 2 3 . 2 
+ 
+ s c i k i t - l e a r n = = 1 . 5 . 0 
+ 
+ s c i p y = = 1 . 1 3 . 1 
+ 
+ s c o o p = = 0 . 7 . 2 . 0 
+ 
+ s c r a m p = = 1 . 4 . 5 
+ 
+ S c r a p y   @   f i l e : / / / C : / b / a b s _ b 4 0 7 w r c u i j / c r o o t / s c r a p y _ 1 7 0 8 7 1 4 7 5 5 4 6 0 / w o r k 
+ 
+ s e a b o r n = = 0 . 1 3 . 2 
+ 
+ s e m a n t i c - v e r s i o n = = 2 . 1 0 . 0 
+ 
+ s e m v e r   @   f i l e : / / / C : / b / a b s _ 4 b k b n 3 v 6 j p / c r o o t / s e m v e r _ 1 7 0 9 2 4 3 6 8 2 4 8 3 / w o r k 
+ 
+ S e n d 2 T r a s h   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / s e n d 2 t r a s h _ 1 7 0 1 8 0 6 4 0 0 7 6 7 / w o r k 
+ 
+ s e r v i c e - i d e n t i t y   @   f i l e : / / / U s e r s / k t i e t z / d e m o / m c 3 / c o n d a - b l d / s e r v i c e _ i d e n t i t y _ 1 6 2 9 4 6 0 7 5 7 1 3 7 / w o r k 
+ 
+ s e t u p t o o l s = = 7 5 . 1 . 0 
+ 
+ s h e l l i n g h a m = = 1 . 5 . 4 
+ 
+ s i p   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / s i p _ 1 6 9 9 4 7 5 5 9 0 6 7 7 / w o r k 
+ 
+ s i x = = 1 . 1 6 . 0 
+ 
+ s m a r t - o p e n   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / s m a r t _ o p e n _ 1 6 9 9 4 8 3 2 1 6 0 5 8 / w o r k 
+ 
+ s m d e b u g - r u l e s c o n f i g = = 1 . 0 . 1 
+ 
+ s m m a p = = 5 . 0 . 1 
+ 
+ s n i f f i o   @   f i l e : / / / C : / b / a b s _ 3 a k d e w u d o _ / c r o o t / s n i f f i o _ 1 7 0 5 4 3 1 3 3 7 3 9 6 / w o r k 
+ 
+ s n o w b a l l s t e m m e r   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / s n o w b a l l s t e m m e r _ 1 6 3 7 9 3 7 0 8 0 5 9 5 / w o r k 
+ 
+ s o r t e d c o n t a i n e r s   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / s o r t e d c o n t a i n e r s _ 1 6 2 3 9 4 9 0 9 9 1 7 7 / w o r k 
+ 
+ s o u p s i e v e   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / s o u p s i e v e _ 1 6 9 9 4 9 6 6 1 1 1 6 9 / w o r k 
+ 
+ S p h i n x   @   f i l e : / / / C : / b / a b s _ 6 7 j 2 y 1 k k d 0 / c r o o t / s p h i n x _ 1 7 1 8 2 7 5 3 9 6 1 1 1 / w o r k 
+ 
+ s p h i n x c o n t r i b - a p p l e h e l p   @   f i l e : / / / h o m e / k t i e t z / s r c / c i / s p h i n x c o n t r i b - a p p l e h e l p _ 1 6 1 1 9 2 0 8 4 1 4 6 4 / w o r k 
+ 
+ s p h i n x c o n t r i b - d e v h e l p   @   f i l e : / / / h o m e / k t i e t z / s r c / c i / s p h i n x c o n t r i b - d e v h e l p _ 1 6 1 1 9 2 0 9 2 3 0 9 4 / w o r k 
+ 
+ s p h i n x c o n t r i b - h t m l h e l p   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / s p h i n x c o n t r i b - h t m l h e l p _ 1 6 2 3 9 4 5 6 2 6 7 9 2 / w o r k 
+ 
+ s p h i n x c o n t r i b - j s m a t h   @   f i l e : / / / h o m e / k t i e t z / s r c / c i / s p h i n x c o n t r i b - j s m a t h _ 1 6 1 1 9 2 0 9 4 2 2 2 8 / w o r k 
+ 
+ s p h i n x c o n t r i b - q t h e l p   @   f i l e : / / / h o m e / k t i e t z / s r c / c i / s p h i n x c o n t r i b - q t h e l p _ 1 6 1 1 9 2 1 0 5 5 3 2 2 / w o r k 
+ 
+ s p h i n x c o n t r i b - s e r i a l i z i n g h t m l   @   f i l e : / / / C : / b / a b s _ 9 1 2 6 6 t d n k r / c r o o t / s p h i n x c o n t r i b - s e r i a l i z i n g h t m l _ 1 7 1 8 2 0 1 5 0 1 9 5 9 / w o r k 
+ 
+ s p y d e r   @   f i l e : / / / C : / b / a b s _ a 2 o r h m q n u f / c r o o t / s p y d e r _ 1 7 1 0 5 2 3 7 3 7 9 3 1 / w o r k 
+ 
+ s p y d e r - k e r n e l s   @   f i l e : / / / C : / b / a b s _ e 5 u 6 y 4 l d r 2 / c r o o t / s p y d e r - k e r n e l s _ 1 7 0 7 9 3 7 7 6 7 9 5 6 / w o r k 
+ 
+ S Q L A l c h e m y   @   f i l e : / / / C : / b / a b s _ a a 2 i z o 0 x i o / c r o o t / s q l a l c h e m y _ 1 7 1 8 3 7 8 1 8 4 0 6 3 / w o r k 
+ 
+ s t a c k - d a t a = = 0 . 6 . 3 
+ 
+ s t a r l e t t e = = 0 . 4 1 . 2 
+ 
+ s t a t i s t i c s = = 1 . 0 . 3 . 5 
+ 
+ s t a t s m o d e l s   @   f i l e : / / / C : / b / a b s _ 5 4 b 3 3 x d u k x / c r o o t / s t a t s m o d e l s _ 1 7 1 8 3 8 1 2 0 9 9 3 3 / w o r k 
+ 
+ s t o r a g e 3 = = 0 . 9 . 0 
+ 
+ s t r e a m l i t = = 1 . 3 3 . 0 
+ 
+ s t r e a m l i t - a u t o r e f r e s h = = 1 . 0 . 1 
+ 
+ s t r i p r t f = = 0 . 0 . 2 6 
+ 
+ s u p a b a s e = = 2 . 1 0 . 0 
+ 
+ s u p a f u n c = = 0 . 7 . 0 
+ 
+ s y m p y = = 1 . 1 2 
+ 
+ t a b l e s   @   f i l e : / / / C : / b / a b s _ 4 1 1 7 4 0 a j o 7 / c r o o t / p y t a b l e s _ 1 7 0 5 6 1 4 8 8 3 1 0 8 / w o r k 
+ 
+ t a b u l a t e   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / t a b u l a t e _ 1 7 0 1 8 1 2 8 5 2 1 3 3 / w o r k 
+ 
+ t b b = = 2 0 2 1 . 1 1 . 0 
+ 
+ t b l i b = = 3 . 0 . 0 
+ 
+ t e n a c i t y = = 8 . 2 . 3 
+ 
+ t e n s o r b o a r d = = 2 . 1 6 . 2 
+ 
+ t e n s o r b o a r d - d a t a - s e r v e r = = 0 . 7 . 2 
+ 
+ t e n s o r f l o w = = 2 . 1 6 . 1 
+ 
+ t e n s o r f l o w - i n t e l = = 2 . 1 6 . 1 
+ 
+ t e n s o r f l o w - r e c o m m e n d e r s = = 0 . 3 . 0 
+ 
+ t e r m c o l o r = = 2 . 4 . 0 
+ 
+ t e r m i n a d o   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / t e r m i n a d o _ 1 6 9 9 5 4 5 0 6 6 6 0 7 / w o r k 
+ 
+ t e x t - u n i d e c o d e   @   f i l e : / / / U s e r s / k t i e t z / d e m o / m c 3 / c o n d a - b l d / t e x t - u n i d e c o d e _ 1 6 2 9 4 0 1 3 5 4 5 5 3 / w o r k 
+ 
+ t e x t b l o b = = 0 . 1 8 . 0 . p o s t 0 
+ 
+ t e x t d i s t a n c e   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / t e x t d i s t a n c e _ 1 6 1 2 4 6 1 3 9 8 0 1 2 / w o r k 
+ 
+ t f _ k e r a s = = 2 . 1 6 . 0 
+ 
+ t h o p = = 0 . 1 . 1 . p o s t 2 2 0 9 0 7 2 2 3 8 
+ 
+ t h r e a d p o o l c t l = = 3 . 5 . 0 
+ 
+ t h r e e - m e r g e   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / t h r e e - m e r g e _ 1 6 0 7 5 5 3 2 6 1 1 1 0 / w o r k 
+ 
+ t i f f f i l e = = 2 0 2 4 . 5 . 2 2 
+ 
+ t i k t o k e n = = 0 . 8 . 0 
+ 
+ t i n y c s s 2   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / t i n y c s s 2 _ 1 6 9 9 5 4 5 1 8 5 7 5 4 / w o r k 
+ 
+ t l d e x t r a c t   @   f i l e : / / / o p t / c o n d a / c o n d a - b l d / t l d e x t r a c t _ 1 6 4 6 6 3 8 3 1 4 3 8 5 / w o r k 
+ 
+ t o k e n i z e r s = = 0 . 2 0 . 3 
+ 
+ t o m l = = 0 . 1 0 . 2 
+ 
+ t o m l i   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / t o m l i _ 1 6 9 9 4 7 2 5 2 8 8 9 7 / w o r k 
+ 
+ t o m l k i t = = 0 . 1 2 . 0 
+ 
+ t o o l z = = 0 . 1 2 . 1 
+ 
+ t o r c h = = 2 . 3 . 1 + c u 1 2 1 
+ 
+ t o r c h a u d i o = = 2 . 3 . 1 + c u 1 2 1 
+ 
+ t o r c h v i s i o n = = 0 . 1 8 . 1 + c u 1 2 1 
+ 
+ t o r n a d o = = 6 . 4 
+ 
+ t q d m = = 4 . 6 6 . 4 
+ 
+ t r a i t l e t s = = 5 . 1 4 . 0 
+ 
+ t r a n s f o r m e r s = = 4 . 4 6 . 3 
+ 
+ t r u s t s t o r e   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / t r u s t s t o r e _ 1 7 0 1 8 8 1 3 8 5 4 2 4 / w o r k 
+ 
+ T w i s t e d   @   f i l e : / / / C : / b / a b s _ e 7 y q d 8 1 1 i n / c r o o t / t w i s t e d _ 1 7 0 8 7 0 2 8 8 3 7 6 9 / w o r k 
+ 
+ t w i s t e d - i o c p s u p p o r t   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / t w i s t e d - i o c p s u p p o r t _ 1 6 9 9 4 9 6 8 9 1 0 1 1 / w o r k 
+ 
+ t y p e r = = 0 . 1 3 . 0 
+ 
+ t y p i n g - i n s p e c t = = 0 . 9 . 0 
+ 
+ t y p i n g _ e x t e n s i o n s = = 4 . 1 2 . 2 
+ 
+ t z d a t a = = 2 0 2 4 . 1 
+ 
+ u c - m i c r o - p y   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / u c - m i c r o - p y _ 1 6 9 9 5 4 5 6 1 2 9 8 4 / w o r k 
+ 
+ u j s o n   @   f i l e : / / / C : / b / a b s _ c 9 3 a 2 7 8 x y 4 / c r o o t / u j s o n _ 1 7 1 7 5 9 8 0 6 2 0 8 2 / w o r k 
+ 
+ u l t r a l y t i c s = = 8 . 3 . 3 8 
+ 
+ u l t r a l y t i c s - t h o p = = 2 . 0 . 1 2 
+ 
+ u n i c o d e d a t a 2   @   f i l e : / / / C : / b / a b s _ b 6 a p l d l g 7 y / c r o o t / u n i c o d e d a t a 2 _ 1 7 1 3 2 1 2 9 9 8 2 5 5 / w o r k 
+ 
+ U n i d e c o d e   @   f i l e : / / / t m p / b u i l d / 8 0 7 5 4 a f 9 / u n i d e c o d e _ 1 6 1 4 7 1 2 3 7 7 4 3 8 / w o r k 
+ 
+ u r i t e m p l a t e = = 4 . 1 . 1 
+ 
+ u r l l i b 3 = = 2 . 1 . 0 
+ 
+ u v i c o r n = = 0 . 3 2 . 0 
+ 
+ w 3 l i b   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / w 3 l i b _ 1 7 0 9 1 6 2 5 7 3 9 0 8 / w o r k 
+ 
+ w a t c h d o g = = 4 . 0 . 0 
+ 
+ w c w i d t h = = 0 . 2 . 1 2 
+ 
+ w e b e n c o d i n g s   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / w e b e n c o d i n g s _ 1 6 9 9 4 9 7 0 6 9 4 1 6 / w o r k 
+ 
+ w e b s o c k e t - c l i e n t   @   f i l e : / / / C : / b / a b s _ 5 d m n x x o c i 9 / c r o o t / w e b s o c k e t - c l i e n t _ 1 7 1 5 8 7 8 3 5 1 3 1 9 / w o r k 
+ 
+ w e b s o c k e t s = = 1 2 . 0 
+ 
+ W e r k z e u g = = 3 . 0 . 1 
+ 
+ w h a t t h e p a t c h   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / w h a t t h e p a t c h _ 1 6 9 9 4 9 7 1 3 4 5 9 0 / w o r k 
+ 
+ w h e e l = = 0 . 4 3 . 0 
+ 
+ w i d g e t s n b e x t e n s i o n   @   f i l e : / / / C : / b / a b s _ 5 3 8 o 2 c r z 7 f / c r o o t / w i d g e t s n b e x t e n s i o n _ 1 7 1 0 9 6 0 0 9 9 8 7 2 / w o r k 
+ 
+ w i n - i n e t - p t o n   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / w i n _ i n e t _ p t o n _ 1 6 9 9 4 7 2 9 9 2 9 9 2 / w o r k 
+ 
+ w r a p t = = 1 . 1 6 . 0 
+ 
+ x a r r a y   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / x a r r a y _ 1 6 9 9 4 8 0 2 7 4 0 6 9 / w o r k 
+ 
+ x l w i n g s   @   f i l e : / / / C : / b / a b s _ 6 b s a q a 7 9 5 f / c r o o t / x l w i n g s _ 1 7 1 8 0 4 6 9 4 8 7 4 5 / w o r k 
+ 
+ x y z s e r v i c e s   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / x y z s e r v i c e s _ 1 6 9 9 5 4 8 9 0 6 1 6 3 / w o r k 
+ 
+ y a p f   @   f i l e : / / / C : / b / a b s _ 8 a i d a y e p 1 8 / c r o o t / y a p f _ 1 7 0 8 9 6 4 3 7 2 6 4 9 / w o r k 
+ 
+ y a r l = = 1 . 1 8 . 0 
+ 
+ z i c t   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / z i c t _ 1 6 9 9 5 4 8 9 7 9 0 0 5 / w o r k 
+ 
+ z i p p = = 3 . 1 9 . 2 
+ 
+ z o p e . i n t e r f a c e   @   f i l e : / / / C : / U s e r s / d e v - a d m i n / p e r s e v e r a n c e - p y t h o n - b u i l d o u t / c r o o t / z o p e . i n t e r f a c e _ 1 6 9 9 4 9 7 1 6 4 7 0 9 / w o r k 
+ 
+ z s t a n d a r d   @   f i l e : / / / C : / b / a b s _ e 4 6 t f 0 _ 9 1 g / c r o o t / z s t a n d a r d _ 1 7 1 4 6 7 8 3 0 3 6 1 5 / w o r k 
+ 
+ 
