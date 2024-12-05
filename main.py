@@ -7,12 +7,6 @@ from dotenv import load_dotenv
 from sklearn.svm import SVC
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
-import ssl
-import logging
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
@@ -26,11 +20,6 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 
 # FastAPI app initialization
 app = FastAPI()
-
-# Define Root Endpoint
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to the Food Recommendation API!"}
 
 category_mapping = {
     1: "categorySalad",
@@ -49,26 +38,17 @@ category_mapping = {
     14: "categoryVegetable"
 }
 
-def create_ssl_context():
-    ssl_context = ssl.create_default_context()
-    # If using a self-signed certificate, uncomment and set the path to your CA certificate
-    # ssl_context = ssl.create_default_context(cafile='/path/to/ca_certificate.crt')
-    # OR disable verification (not recommended)
-    # ssl_context.check_hostname = False
-    # ssl_context.verify_mode = ssl.CERT_NONE
-    return ssl_context
-
 def fetch_data_user_data():
     connection = None
     try:
-        ssl_context = create_ssl_context()
+        # Establish a connection to the PostgreSQL database
         connection = pg8000.connect(
             host=DB_HOST,
             port=DB_PORT,
             database=DB_NAME,
             user=DB_USER,
             password=DB_PASSWORD,
-            ssl_context=ssl_context
+            ssl_context=True
         )
         cursor = connection.cursor()
 
@@ -107,11 +87,10 @@ def fetch_data_user_data():
         # Combine the DataFrames
         combined_df = pd.concat([df_health, df_allergies, df_category_pivot], axis=1)
 
-        logger.info("Successfully fetched and combined user data.")
         return combined_df
 
     except Exception as e:
-        logger.error(f"An error occurred in fetch_data_user_data: {e}")
+        print(f"An error occurred: {e}")
         return pd.DataFrame()
 
     finally:
@@ -121,14 +100,13 @@ def fetch_data_user_data():
 def fetch_and_transform_food_data():
     connection = None
     try:
-        ssl_context = create_ssl_context()
+        # Establish a connection to the PostgreSQL database
         connection = pg8000.connect(
             host=DB_HOST,
             port=DB_PORT,
             database=DB_NAME,
             user=DB_USER,
-            password=DB_PASSWORD,
-            ssl_context=ssl_context
+            password=DB_PASSWORD
         )
         cursor = connection.cursor()
 
@@ -150,35 +128,35 @@ def fetch_and_transform_food_data():
         # **Rename 'id' to 'foodItemId'**
         if 'id' in df.columns:
             df.rename(columns={'id': 'foodItemId'}, inplace=True)
-            logger.info("Renamed 'id' to 'foodItemId' in df_food_details.")
+            print("Renamed 'id' to 'foodItemId' in df_food_details.")
         else:
-            logger.warning(f"'id' column not found in df_food_details. Available columns: {df.columns.tolist()}")
+            print("Warning: 'id' column not found in df_food_details. Available columns:", df.columns.tolist())
 
         # **Optional: Verify the renaming**
-        logger.info(f"df_food_details columns after renaming: {df.columns.tolist()}")
+        print("df_food_details columns after renaming:", df.columns.tolist())
 
         # Return the DataFrame with all data
         return df
 
     except Exception as e:
-        logger.error(f"An error occurred in fetch_and_transform_food_data: {e}")
+        print(f"An error occurred in fetch_and_transform_food_data: {e}")
         return pd.DataFrame()
 
     finally:
         if connection:
             connection.close()
 
+
 def fetch_and_transform_swipe_data():
     connection = None
     try:
-        ssl_context = create_ssl_context()
+        # Establish a connection to the PostgreSQL database
         connection = pg8000.connect(
             host=DB_HOST,
             port=DB_PORT,
             database=DB_NAME,
             user=DB_USER,
-            password=DB_PASSWORD,
-            ssl_context=ssl_context
+            password=DB_PASSWORD
         )
         cursor = connection.cursor()
 
@@ -215,11 +193,11 @@ def fetch_and_transform_swipe_data():
                 "categoryId": group["categoryId"].tolist(),
             }
 
-        logger.info("Successfully fetched and transformed swipe data.")
+        # Return the recommendations dictionary
         return expected_recommendations
 
     except Exception as e:
-        logger.error(f"An error occurred in fetch_and_transform_swipe_data: {e}")
+        print(f"An error occurred: {e}")
         return {}
 
     finally:
@@ -239,12 +217,9 @@ class RecommendationResponse(BaseModel):
 # Recommendation logic (simplified for API use)
 def recommend_food_for_user(combined_df, df_food_details, expected_recommendation, user_id, top_n=6):
 
-    logger.info("Combined DataFrame:")
-    logger.info(combined_df)
-    logger.info("Food Details DataFrame:")
-    logger.info(df_food_details)
-    logger.info("Expected Recommendations:")
-    logger.info(expected_recommendation)
+    print(combined_df)
+    print(df_food_details)
+    print(expected_recommendation)
     """
     Generates top N food recommendations for a specified user based on their preferences and pushes the recommendations
     to the app_user.user_food_recommendations table.
@@ -259,15 +234,15 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     Returns:
     - top_dishes_with_nutrients (pd.DataFrame): DataFrame containing the top recommended dishes.
     """
-    logger.info(f"Generating recommendations for User ID: {user_id}")
+    print(f"Generating recommendations for User ID: {user_id}")
 
     if user_id not in expected_recommendation:
-        logger.warning(f"No expected recommendations found for User ID {user_id}.")
+        print(f"No expected recommendations found for User ID {user_id}.")
         return pd.DataFrame()
 
     user_data = combined_df[combined_df['user_id'] == user_id]
     if user_data.empty:
-        logger.warning(f"No data found for User ID {user_id}.")
+        print(f"No data found for User ID {user_id}.")
         return pd.DataFrame()
 
     user_data = user_data.iloc[0]
@@ -296,7 +271,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     if 'categoryId' in menu_data.columns:
         menu_data['categoryId'] = menu_data['categoryId'].dropna().astype(int)
     else:
-        logger.error("categoryId column is missing in menu_data.")
+        print("categoryId column is missing in menu_data.")
         return pd.DataFrame()
 
     scaler = StandardScaler()
@@ -328,14 +303,13 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     # Push to the database
     connection = None
     try:
-        ssl_context = create_ssl_context()
         connection = pg8000.connect(
             host=DB_HOST,
             port=DB_PORT,
             database=DB_NAME,
             user=DB_USER,
             password=DB_PASSWORD,
-            ssl_context=ssl_context
+            ssl_context=True
         )
         cursor = connection.cursor()
 
@@ -348,18 +322,18 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
             cursor.execute(query, (row['user_id'], row['food_detail_id'], row['Rank']))
 
         connection.commit()
-        logger.info("Top recommended dishes have been successfully pushed to the database.")
+        print("Top recommended dishes have been successfully pushed to the database.")
     except Exception as e:
-        logger.error(f"An error occurred while pushing recommendations to the database: {e}")
+        print(f"An error occurred while pushing recommendations to the database: {e}")
     finally:
         if connection:
             connection.close()
 
-    logger.info("\nTop Recommended Dishes with Nutritional Information:")
-    logger.info(top_dishes_with_nutrients)
+    print("\nTop Recommended Dishes with Nutritional Information:")
+    print(top_dishes_with_nutrients)
 
     # Return the DataFrame
-    return top_dishes_with_nutrients
+
 
 # API Endpoint
 @app.post("/recommendations", response_model=RecommendationResponse)
@@ -370,14 +344,13 @@ async def get_recommendations():
     try:
         # Determine the user_id internally
         if not expected_recommendations:
-            logger.warning("No recommendations available.")
             raise HTTPException(status_code=404, detail="No recommendations available.")
 
         # For demonstration, select the latest user_id
         user_id = max(expected_recommendations.keys())
         top_n = 6  # Default value; adjust as needed
 
-        logger.info(f"Selected User ID for recommendations: {user_id}")
+        print(f"Selected User ID for recommendations: {user_id}")
 
         recommendations_df = recommend_food_for_user(
             combined_df=combined_df,
@@ -388,7 +361,6 @@ async def get_recommendations():
         )
 
         if recommendations_df.empty:
-            logger.warning(f"No recommendations available for user {user_id}")
             raise HTTPException(status_code=404, detail=f"No recommendations available for user {user_id}")
 
         # Convert the recommendations to a list of dictionaries
@@ -399,5 +371,4 @@ async def get_recommendations():
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
-        logger.error(f"An unexpected error occurred: {e}")
         raise HTTPException(status_code=500, detail=str(e))
