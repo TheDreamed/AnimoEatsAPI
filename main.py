@@ -307,8 +307,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
             port=DB_PORT,
             database=DB_NAME,
             user=DB_USER,
-            password=DB_PASSWORD,
-            ssl_context=True
+            password=DB_PASSWORD
         )
         cursor = connection.cursor()
 
