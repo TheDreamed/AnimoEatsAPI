@@ -47,8 +47,7 @@ def fetch_data_user_data():
             port=DB_PORT,
             database=DB_NAME,
             user=DB_USER,
-            password=DB_PASSWORD,
-            ssl_context=True
+            password=DB_PASSWORD
         )
         cursor = connection.cursor()
 
