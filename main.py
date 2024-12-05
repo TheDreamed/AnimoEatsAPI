@@ -1,12 +1,18 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-import pandas as pd
+import ssl
 import pg8000
+import pandas as pd
 import os
 from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from sklearn.svm import SVC
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
@@ -38,6 +44,18 @@ category_mapping = {
     14: "categoryVegetable"
 }
 
+def get_ssl_context():
+    # Option 1: Proper SSL Configuration
+    ssl_ctx = ssl.create_default_context()
+    ssl_ctx.load_verify_locations(cafile='path/to/ca_certificate.pem')  # Update the path
+    return ssl_ctx
+
+    # Option 2: Insecure SSL Configuration (Use only for development)
+    # ssl_ctx = ssl.create_default_context()
+    # ssl_ctx.check_hostname = False
+    # ssl_ctx.verify_mode = ssl.CERT_NONE
+    # return ssl_ctx
+
 def fetch_data_user_data():
     connection = None
     try:
@@ -47,7 +65,8 @@ def fetch_data_user_data():
             port=DB_PORT,
             database=DB_NAME,
             user=DB_USER,
-            password=DB_PASSWORD
+            password=DB_PASSWORD,
+            ssl_context=get_ssl_context()
         )
         cursor = connection.cursor()
 
@@ -89,7 +108,7 @@ def fetch_data_user_data():
         return combined_df
 
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logger.error(f"An error occurred in fetch_data_user_data: {e}")
         return pd.DataFrame()
 
     finally:
@@ -105,7 +124,8 @@ def fetch_and_transform_food_data():
             port=DB_PORT,
             database=DB_NAME,
             user=DB_USER,
-            password=DB_PASSWORD
+            password=DB_PASSWORD,
+            ssl_context=get_ssl_context()
         )
         cursor = connection.cursor()
 
@@ -127,24 +147,23 @@ def fetch_and_transform_food_data():
         # **Rename 'id' to 'foodItemId'**
         if 'id' in df.columns:
             df.rename(columns={'id': 'foodItemId'}, inplace=True)
-            print("Renamed 'id' to 'foodItemId' in df_food_details.")
+            logger.info("Renamed 'id' to 'foodItemId' in df_food_details.")
         else:
-            print("Warning: 'id' column not found in df_food_details. Available columns:", df.columns.tolist())
+            logger.warning(f"'id' column not found in df_food_details. Available columns: {df.columns.tolist()}")
 
         # **Optional: Verify the renaming**
-        print("df_food_details columns after renaming:", df.columns.tolist())
+        logger.info(f"df_food_details columns after renaming: {df.columns.tolist()}")
 
         # Return the DataFrame with all data
         return df
 
     except Exception as e:
-        print(f"An error occurred in fetch_and_transform_food_data: {e}")
+        logger.error(f"An error occurred in fetch_and_transform_food_data: {e}")
         return pd.DataFrame()
 
     finally:
         if connection:
             connection.close()
-
 
 def fetch_and_transform_swipe_data():
     connection = None
@@ -155,7 +174,8 @@ def fetch_and_transform_swipe_data():
             port=DB_PORT,
             database=DB_NAME,
             user=DB_USER,
-            password=DB_PASSWORD
+            password=DB_PASSWORD,
+            ssl_context=get_ssl_context()
         )
         cursor = connection.cursor()
 
@@ -196,7 +216,7 @@ def fetch_and_transform_swipe_data():
         return expected_recommendations
 
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logger.error(f"An error occurred in fetch_and_transform_swipe_data: {e}")
         return {}
 
     finally:
@@ -215,33 +235,15 @@ class RecommendationResponse(BaseModel):
 
 # Recommendation logic (simplified for API use)
 def recommend_food_for_user(combined_df, df_food_details, expected_recommendation, user_id, top_n=6):
-
-    print(combined_df)
-    print(df_food_details)
-    print(expected_recommendation)
-    """
-    Generates top N food recommendations for a specified user based on their preferences and pushes the recommendations
-    to the app_user.user_food_recommendations table.
-
-    Parameters:
-    - combined_df (pd.DataFrame): DataFrame containing user information and category preferences.
-    - df_food_details (pd.DataFrame): DataFrame containing food item details.
-    - expected_recommendation (dict): Dictionary mapping user_id to expected foodItemId and categoryId.
-    - user_id (int): The ID of the user to generate recommendations for.
-    - top_n (int): Number of top recommendations to generate.
-
-    Returns:
-    - top_dishes_with_nutrients (pd.DataFrame): DataFrame containing the top recommended dishes.
-    """
-    print(f"Generating recommendations for User ID: {user_id}")
+    logger.info(f"Generating recommendations for User ID: {user_id}")
 
     if user_id not in expected_recommendation:
-        print(f"No expected recommendations found for User ID {user_id}.")
+        logger.warning(f"No expected recommendations found for User ID {user_id}.")
         return pd.DataFrame()
 
     user_data = combined_df[combined_df['user_id'] == user_id]
     if user_data.empty:
-        print(f"No data found for User ID {user_id}.")
+        logger.warning(f"No data found for User ID {user_id}.")
         return pd.DataFrame()
 
     user_data = user_data.iloc[0]
@@ -270,7 +272,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     if 'categoryId' in menu_data.columns:
         menu_data['categoryId'] = menu_data['categoryId'].dropna().astype(int)
     else:
-        print("categoryId column is missing in menu_data.")
+        logger.error("categoryId column is missing in menu_data.")
         return pd.DataFrame()
 
     scaler = StandardScaler()
@@ -307,7 +309,8 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
             port=DB_PORT,
             database=DB_NAME,
             user=DB_USER,
-            password=DB_PASSWORD
+            password=DB_PASSWORD,
+            ssl_context=get_ssl_context()
         )
         cursor = connection.cursor()
 
@@ -320,18 +323,18 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
             cursor.execute(query, (row['user_id'], row['food_detail_id'], row['Rank']))
 
         connection.commit()
-        print("Top recommended dishes have been successfully pushed to the database.")
+        logger.info("Top recommended dishes have been successfully pushed to the database.")
     except Exception as e:
-        print(f"An error occurred while pushing recommendations to the database: {e}")
+        logger.error(f"An error occurred while pushing recommendations to the database: {e}")
     finally:
         if connection:
             connection.close()
 
-    print("\nTop Recommended Dishes with Nutritional Information:")
-    print(top_dishes_with_nutrients)
+    logger.info("\nTop Recommended Dishes with Nutritional Information:")
+    logger.info(top_dishes_with_nutrients)
 
     # Return the DataFrame
-
+    return top_dishes_with_nutrients
 
 # API Endpoint
 @app.post("/recommendations", response_model=RecommendationResponse)
@@ -348,7 +351,7 @@ async def get_recommendations():
         user_id = max(expected_recommendations.keys())
         top_n = 6  # Default value; adjust as needed
 
-        print(f"Selected User ID for recommendations: {user_id}")
+        logger.info(f"Selected User ID for recommendations: {user_id}")
 
         recommendations_df = recommend_food_for_user(
             combined_df=combined_df,
@@ -369,4 +372,10 @@ async def get_recommendations():
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
+        logger.error(f"An unexpected error occurred: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# Optional: Root Endpoint to handle HEAD and GET requests to '/'
+@app.get("/")
+async def root():
+    return {"message": "API is up and running."}
