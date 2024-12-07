@@ -434,15 +434,21 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
 
         # Insert recommendations into the database
         for _, row in top_dishes_with_scores.iterrows():
+            # Explicitly cast to Python int to ensure compatibility
+            user_id_int = int(row['user_id'])
+            food_detail_id_int = int(row['food_detail_id'])
+            rank_int = int(row['Rank'])
+
             # Debugging statement to verify types and values
-            print(f"Inserting user_id: {row['user_id']} (type: {type(row['user_id'])}), "
-                  f"food_detail_id: {row['food_detail_id']} (type: {type(row['food_detail_id'])}), "
-                  f"rank: {row['Rank']} (type: {type(row['Rank'])})")
+            print(f"Inserting user_id: {user_id_int} (type: {type(user_id_int)}), "
+                  f"food_detail_id: {food_detail_id_int} (type: {type(food_detail_id_int)}), "
+                  f"rank: {rank_int} (type: {type(rank_int)})")
+
             query = '''
             INSERT INTO app_user.user_food_recommendations (user_id, food_detail_id, rank)
             VALUES (%s, %s, %s)
             '''
-            cursor.execute(query, (row['user_id'], row['food_detail_id'], row['Rank']))
+            cursor.execute(query, (user_id_int, food_detail_id_int, rank_int))
 
         connection.commit()
         print("Top recommended dishes have been successfully pushed to the database.")
@@ -455,7 +461,6 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     print("\nTop Recommended Dishes with Scores:")
     print(top_dishes_with_scores)
     return top_dishes_with_scores
-    # Return the DataFrame
 
 
 # API Endpoint
@@ -474,6 +479,7 @@ async def get_recommendations():
 
         # For demonstration, select the latest user_id
         user_id = max(expected_recommendation.keys())
+        user_id = int(user_id)  # Ensure user_id is an integer
         top_n = 6  # Default value; adjust as needed
 
         print(f"Selected User ID for recommendations: {user_id}")
