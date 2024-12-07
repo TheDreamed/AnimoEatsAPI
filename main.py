@@ -465,21 +465,42 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
 
 # API Endpoint
 @app.post("/recommendations", response_model=RecommendationResponse)
-async def get_recommendations():
-    """
-    Endpoint to get food recommendations for the latest user.
-    """
-    combined_df = fetch_data_user_data()  
-    df_food_details = fetch_and_transform_food_data()
-    expected_recommendation = fetch_and_transform_swipe_data() 
-    try:
-        # Determine the user_id internally
-        if not expected_recommendation:
-            raise HTTPException(status_code=404, detail="No recommendations available.")
+async def get_recommendations(request: RecommendationRequest):
+    # Extract user_id from the request
+    user_id = request.user_id
+    # Construct the external URL with the provided user_id
+    external_url = f"https://app-ivqcpctaoq-uc.a.run.app/dev/food/{user_id}/available"
+    
+    # Make an asynchronous GET request to the external URL
+    async with httpx.AsyncClient() as client:
+        try:
+            external_response = await client.get(external_url)
+            external_response.raise_for_status()
+            available_foods = external_response.json()
+            
+            # Process available_foods as needed
+            df_food_details = fetch_and_transform_food_data()
+            if available_foods:
+                df_food_details = df_food_details[df_food_details['foodItemId'].isin(available_foods)]
+            else:
+                raise HTTPException(status_code=404, detail="No available foods found for the user.")
+        except httpx.HTTPStatusError as http_exc:
+            raise HTTPException(status_code=http_exc.response.status_code, detail=f"Error fetching available foods: {http_exc.response.text}")
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"An error occurred while fetching available foods: {str(e)}")
+    
+    # Proceed with existing recommendation logic
+    combined_df = fetch_data_user_data()
+    expected_recommendation = fetch_and_transform_swipe_data()
 
-        # For demonstration, select the latest user_id
-        user_id = max(expected_recommendation.keys())
-        user_id = int(user_id)  # Ensure user_id is an integer
+    # Verify user existence
+    if user_id not in expected_recommendation:
+        raise HTTPException(status_code=404, detail=f"No recommendation data available for user {user_id}")
+
+    if user_id not in combined_df['user_id'].values:
+        raise HTTPException(status_code=404, detail=f"No user health data found for user {user_id}")
+
+    try:
         top_n = 6  # Default value; adjust as needed
 
         print(f"Selected User ID for recommendations: {user_id}")
@@ -488,7 +509,7 @@ async def get_recommendations():
             combined_df=combined_df,
             df_food_details=df_food_details,
             expected_recommendation=expected_recommendation,
-            user_id=user_id,       # Pass the internally determined user_id
+            user_id=user_id,       # Pass the externally provided user_id
             top_n=top_n
         )
 
