@@ -276,42 +276,38 @@ nutrient_column_mapping = {
 
 def recommend_food_for_user(combined_df, df_food_details, expected_recommendation, user_id, top_n=6):
     """
-    Generates top N food recommendations for the latest user based on their preferences and nutritional needs,
+    Generates top N food recommendations for the specified user based on their preferences and nutritional needs,
     giving 80% importance to nutritional needs and 20% to category preferences.
 
     Parameters:
     - combined_df (pd.DataFrame): DataFrame containing user information, category preferences, and nutritional needs.
     - df_food_details (pd.DataFrame): DataFrame containing food item details and nutritional information.
     - expected_recommendation (dict): Dictionary mapping user_id to expected foodItemId, categoryId, and preference.
+    - user_id (int): The ID of the user for whom to generate recommendations.
     - top_n (int): Number of top recommendations to generate.
 
     Returns:
     - pd.DataFrame: DataFrame containing the top recommended dishes with rankings and scores.
     """
-    # Use the latest user_id from expected_recommendation
-    user_id = max(expected_recommendation.keys())  # Get the latest user_id
     print(f"Generating recommendations for User ID: {user_id}")
 
     # Extract user data
     user_data = combined_df[combined_df['user_id'] == user_id]
     if user_data.empty:
         print(f"No data found for User ID {user_id}.")
-        return
+        return pd.DataFrame()  # Return empty DataFrame
 
     user_data = user_data.iloc[0]
     menu_data = df_food_details.copy()
 
     # Extract user expected categories and preferences
-    expected_food_ids = expected_recommendation[user_id].get('foodItemId', [])
-    expected_categories = expected_recommendation[user_id].get('categoryId', [])
-    preferences = expected_recommendation[user_id].get('preference', [])
+    expected_food_ids = expected_recommendation.get(user_id, {}).get('foodItemId', [])
+    expected_categories = expected_recommendation.get(user_id, {}).get('categoryId', [])
+    preferences = expected_recommendation.get(user_id, {}).get('preference', [])
 
     # Map foodItemId to preference
     food_preference_map = dict(zip(expected_food_ids, preferences))
     menu_data['preference'] = menu_data['foodItemId'].map(food_preference_map).fillna(0).astype(int)
-
-    # Define target variable as composite score
-    # Composite Score = (nutrition_weight * nutrient_score) + (category_weight_percent * preference_score)
 
     # 1. Calculate Preference Score
     menu_data['preference_score'] = menu_data['preference']  # 1 for like, 0 for dislike
@@ -329,7 +325,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
 
     if missing_nutrients:
         print(f"Missing or invalid nutritional needs for User ID {user_id}: {missing_nutrients}")
-        return
+        return pd.DataFrame()  # Return empty DataFrame
 
     # Calculate nutrient match ratios, capped at 1.0
     for nutrient in nutritional_weights.keys():
@@ -337,7 +333,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
             target = user_nutritional_needs[nutrient]
             match_feature = f'match_{nutrient}'
             menu_data[match_feature] = menu_data.apply(
-                lambda row: min(row[nutrient] / target, 1.0) if row[nutrient] > 0 else 0.0,
+                lambda row: min(row.get(nutrient, 0) / target, 1.0) if row.get(nutrient, 0) > 0 else 0.0,
                 axis=1
             )
         else:
@@ -352,10 +348,10 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
         menu_data['nutrient_score'] += menu_data[match_feature] * weight
 
     # Define composite score
-    menu_data['composite_score'] = (nutrition_weight * menu_data['nutrient_score']) + (category_weight_percent * menu_data['preference_score'])
-
-    # Define target variable
-    y = menu_data['composite_score']
+    menu_data['composite_score'] = (
+        nutrition_weight * menu_data['nutrient_score'] +
+        category_weight_percent * menu_data['preference_score']
+    )
 
     # Feature Engineering: Include category preferences
     category_features = [col for col in menu_data.columns if col.startswith("category") and col != 'categoryId']
@@ -419,7 +415,10 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     top_dishes_with_scores.rename(columns={'foodItemId': 'food_detail_id', 'predicted_score': 'score'}, inplace=True)
     top_dishes_with_scores['user_id'] = user_id
 
-    
+    # Ensure correct data types
+    top_dishes_with_scores['user_id'] = top_dishes_with_scores['user_id'].astype(int)
+    top_dishes_with_scores['food_detail_id'] = top_dishes_with_scores['food_detail_id'].astype(int)
+    top_dishes_with_scores['Rank'] = top_dishes_with_scores['Rank'].astype(int)
 
     # Push to the database
     connection = None
@@ -435,6 +434,10 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
 
         # Insert recommendations into the database
         for _, row in top_dishes_with_scores.iterrows():
+            # Debugging statement to verify types and values
+            print(f"Inserting user_id: {row['user_id']} (type: {type(row['user_id'])}), "
+                  f"food_detail_id: {row['food_detail_id']} (type: {type(row['food_detail_id'])}), "
+                  f"rank: {row['Rank']} (type: {type(row['Rank'])})")
             query = '''
             INSERT INTO app_user.user_food_recommendations (user_id, food_detail_id, rank)
             VALUES (%s, %s, %s)
@@ -448,9 +451,8 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     finally:
         if connection:
             connection.close()
-            
-    
-    print("\nTop Recommended Dishes with Nutritional Information:")
+
+    print("\nTop Recommended Dishes with Scores:")
     print(top_dishes_with_scores)
     return top_dishes_with_scores
     # Return the DataFrame
