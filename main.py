@@ -231,10 +231,14 @@ def fetch_and_transform_swipe_data():
         if connection:
             connection.close()
 
-
-
+# Define the request model
 class RecommendationRequest(BaseModel):
     user_id: int
+
+# Update the RecommendationResponse model if needed
+class RecommendationResponse(BaseModel):
+    message: str
+    data: list
 
 # Recommendation logic (simplified for API use)
 # Define specific weights for nutritional features
