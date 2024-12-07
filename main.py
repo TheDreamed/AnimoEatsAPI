@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.svm import SVR
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
-
+import aiohttp
 # Load environment variables
 load_dotenv()
 
@@ -470,9 +470,18 @@ async def get_recommendations(request: RecommendationRequest):
     """
     Endpoint to get food recommendations for the latest user.
     """
-    external_url = f"https://app-ivqcpctaoq-uc.a.run.app/dev/food/{user_id}/available"
-    user_id = request.user_id
-    # Construct the external URL with the provided user_id
+    try:
+        user_id = request.user_id  # Assign user_id from request first
+        print(f"Received request for User ID: {user_id}")
+
+        #If you need to use the external URL to fetch data, uncomment and implement the following:
+        external_url = f"https://app-ivqcpctaoq-uc.a.run.app/dev/food/{user_id}/available"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(external_url) as response:
+                if response.status != 200:
+                    raise HTTPException(status_code=response.status, detail="Failed to fetch external data.")
+                external_data = await response.json()
+                # Process external_data as needed
     
     combined_df = fetch_data_user_data()  
     df_food_details = fetch_and_transform_food_data()
