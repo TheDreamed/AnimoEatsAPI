@@ -434,7 +434,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
         cursor = connection.cursor()
 
         # Insert recommendations into the database
-        for _, row in top_dishes_with_nutrients.iterrows():
+        for _, row in top_dishes_with_scores.iterrows():
             query = '''
             INSERT INTO app_user.user_food_recommendations (user_id, food_detail_id, rank)
             VALUES (%s, %s, %s)
