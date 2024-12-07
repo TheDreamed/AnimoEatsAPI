@@ -40,6 +40,8 @@ category_mapping = {
     14: "categoryVegetable"
 }
 
+class RecommendationRequest(BaseModel):
+    user_id: int
 def fetch_data_user_data():
     connection = None
     try:
