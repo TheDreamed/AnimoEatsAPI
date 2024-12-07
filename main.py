@@ -233,10 +233,12 @@ def fetch_and_transform_swipe_data(user_id):
 
 class RecommendationRequest(BaseModel):
     user_id: int
+
 # Response model
 class RecommendationResponse(BaseModel):
     message: str
     data: list
+
 
 # Recommendation logic (simplified for API use)
 # Define specific weights for nutritional features
@@ -495,8 +497,10 @@ async def get_recommendations(request: RecommendationRequest):
         df_food_details = fetch_and_transform_food_data(user_id)
         expected_recommendation = fetch_and_transform_swipe_data(user_id)
 
-        if expected_recommendation.empty:
+        # **Fix starts here**
+        if not expected_recommendation:
             raise HTTPException(status_code=404, detail="No recommendations available.")
+        # **Fix ends here**
 
         # Ensure user_id is an integer (already ensured by Pydantic, but converting just in case)
         user_id = int(user_id)
