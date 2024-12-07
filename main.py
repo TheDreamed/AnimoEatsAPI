@@ -230,7 +230,8 @@ def fetch_and_transform_swipe_data():
             connection.close()
 
 
-
+class RecommendationRequest(BaseModel):
+    user_id: int
 # Response model
 class RecommendationResponse(BaseModel):
     message: str
@@ -465,10 +466,14 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
 
 # API Endpoint
 @app.post("/recommendations", response_model=RecommendationResponse)
-async def get_recommendations():
+async def get_recommendations(request: RecommendationRequest):
     """
     Endpoint to get food recommendations for the latest user.
     """
+    external_url = f"https://app-ivqcpctaoq-uc.a.run.app/dev/food/{user_id}/available"
+    user_id = request.user_id
+    # Construct the external URL with the provided user_id
+    
     combined_df = fetch_data_user_data()  
     df_food_details = fetch_and_transform_food_data()
     expected_recommendation = fetch_and_transform_swipe_data() 
