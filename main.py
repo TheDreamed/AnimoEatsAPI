@@ -1,31 +1,14 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 import pandas as pd
 import pg8000
 import os
 from dotenv import load_dotenv
-from sklearn.svm import SVR  # Using SVR for regression tasks
+import numpy as np
+from sklearn.svm import SVR
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 import httpx
-import logging
-import ssl  # Only if SSL is required
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,  # Change to DEBUG for more detailed logs
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
-# Define the request model
-class RecommendationRequest(BaseModel):
-    user_id: int = Field(..., gt=0, description="The ID of the user for whom to generate recommendations.")
-
-# Define the response model
-class RecommendationResponse(BaseModel):
-    message: str
-    data: list
 
 # Load environment variables
 load_dotenv()
@@ -40,7 +23,6 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 # FastAPI app initialization
 app = FastAPI()
 
-# Category mapping
 category_mapping = {
     1: "categorySalad",
     2: "categoryAppetizers",
@@ -58,6 +40,8 @@ category_mapping = {
     14: "categoryVegetable"
 }
 
+class RecommendationRequest(BaseModel):
+    user_id: int
 def fetch_data_user_data():
     connection = None
     try:
@@ -68,7 +52,6 @@ def fetch_data_user_data():
             database=DB_NAME,
             user=DB_USER,
             password=DB_PASSWORD
-            # ssl_context=ssl.create_default_context()  # Uncomment if SSL is required
         )
         cursor = connection.cursor()
 
@@ -107,11 +90,10 @@ def fetch_data_user_data():
         # Combine the DataFrames
         combined_df = pd.concat([df_health, df_allergies, df_category_pivot], axis=1)
 
-        logger.info("Successfully fetched and combined user data.")
         return combined_df
 
     except Exception as e:
-        logger.error(f"An error occurred in fetch_data_user_data: {e}")
+        print(f"An error occurred: {e}")
         return pd.DataFrame()
 
     finally:
@@ -128,7 +110,6 @@ def fetch_and_transform_food_data():
             database=DB_NAME,
             user=DB_USER,
             password=DB_PASSWORD
-            # ssl_context=ssl.create_default_context()  # Uncomment if SSL is required
         )
         cursor = connection.cursor()
 
@@ -150,31 +131,34 @@ def fetch_and_transform_food_data():
         # **Rename 'id' to 'foodItemId'**
         if 'id' in df.columns:
             df.rename(columns={'id': 'foodItemId'}, inplace=True)
-            logger.info("Renamed 'id' to 'foodItemId' in df_food_details.")
+            print("Renamed 'id' to 'foodItemId' in df_food_details.")
         else:
-            logger.warning(f"'id' column not found in df_food_details. Available columns: {df.columns.tolist()}")
-
-        # **Ensure 'foodItemId' is integer**
-        if 'foodItemId' in df.columns:
-            df['foodItemId'] = df['foodItemId'].astype(int)
-        else:
-            logger.warning("'foodItemId' column is missing after renaming.")
+            print("Warning: 'id' column not found in df_food_details. Available columns:", df.columns.tolist())
 
         # **Optional: Verify the renaming**
-        logger.info(f"df_food_details columns after renaming: {df.columns.tolist()}")
+        print("df_food_details columns after renaming:", df.columns.tolist())
 
         # Return the DataFrame with all data
         return df
 
     except Exception as e:
-        logger.error(f"An error occurred in fetch_and_transform_food_data: {e}")
+        print(f"An error occurred in fetch_and_transform_food_data: {e}")
         return pd.DataFrame()
 
     finally:
         if connection:
             connection.close()
 
+
 def fetch_and_transform_swipe_data():
+    """
+    Fetches swipe data from the PostgreSQL database and transforms it into a dictionary
+    that maps each user_id to their liked and disliked food items along with categories.
+
+    Returns:
+        dict: A dictionary where each key is a user_id and the value is another dictionary
+              containing lists of foodItemId, categoryId, and preference (1 for like, 0 for dislike).
+    """
     connection = None
     try:
         # Establish a connection to the PostgreSQL database
@@ -184,7 +168,6 @@ def fetch_and_transform_swipe_data():
             database=DB_NAME,
             user=DB_USER,
             password=DB_PASSWORD
-            # ssl_context=ssl.create_default_context()  # Uncomment if SSL is required
         )
         cursor = connection.cursor()
 
@@ -203,11 +186,19 @@ def fetch_and_transform_swipe_data():
         # Convert to DataFrame
         df = pd.DataFrame(data, columns=column_names)
 
-        # Rename columns
-        df.rename(columns={"userId": "user_id", "categoryId": "categoryId", "foodItemId": "foodItemId"}, inplace=True)
+        # Rename columns for consistency
+        df.rename(columns={
+            "userId": "user_id",
+            "foodItemId": "foodItemId",
+            "categoryId": "categoryId"
+        }, inplace=True)
 
-        # Map categoryId to category names
-        df["categoryId"] = df["categoryId"].map(category_mapping)
+        # Map categoryId to category names if category_mapping is provided
+        if "category_mapping" in globals() and callable(category_mapping):
+            df["categoryId"] = df["categoryId"].map(category_mapping)
+        else:
+            # If no mapping is provided, you can choose to keep the ID or handle accordingly
+            pass
 
         # Map 'like' to 1 and 'dislike' to 0
         df["preference"] = df["preference"].map({
@@ -215,7 +206,7 @@ def fetch_and_transform_swipe_data():
             "dislike": 0
         })
 
-        # Drop rows with NaN preferences
+        # Handle any unexpected preference values by setting them to a default (e.g., NaN) and dropping
         df = df.dropna(subset=["preference"])
 
         # Convert preferences to integer type
@@ -230,94 +221,183 @@ def fetch_and_transform_swipe_data():
                 "preference": group["preference"].tolist()
             }
 
-        logger.info("Successfully fetched and transformed swipe data.")
+        # Return the recommendations dictionary
         return expected_recommendations
 
     except Exception as e:
-        logger.error(f"An error occurred in fetch_and_transform_swipe_data: {e}")
+        print(f"An error occurred: {e}")
         return {}
 
     finally:
         if connection:
             connection.close()
 
-# Fetch data once at startup
-combined_df = fetch_data_user_data()  
-df_food_details = fetch_and_transform_food_data()
-expected_recommendations = fetch_and_transform_swipe_data() 
+
+
+# Response model
+class RecommendationResponse(BaseModel):
+    message: str
+    data: list
+
+# Recommendation logic (simplified for API use)
+# Define specific weights for nutritional features
+nutritional_weights = {
+    'calories': 0.5,      # 50% of 80% weight
+    'protein': 0.2,       # 20% of 80% weight
+    'carbohydrates': 0.1, # 10% of 80% weight
+    'fat': 0.1,           # 10% of 80% weight
+    'fiber': 0.05,        # 5% of 80% weight
+    'sugar': 0.05,        # 5% of 80% weight
+    'sodium': 0.0         # 0% weight for sodium (not considered for recommendation)
+}
+
+# Define weights
+nutrition_weight = 0.8
+category_weight_percent = 0.2
+
+# Define specific weights for nutritional features
+nutritional_weights = {
+    'calories': 0.5,      # 50% of 80% weight
+    'protein': 0.2,       # 20% of 80% weight
+    'carbohydrates': 0.1, # 10% of 80% weight
+    'fat': 0.1,           # 10% of 80% weight
+    'fiber': 0.05,        # 5% of 80% weight
+    'sugar': 0.05,        # 5% of 80% weight
+    'sodium': 0.0         # 0% weight for sodium
+}
+
+# Define a mapping from standardized nutrient names to combined_df column names
+nutrient_column_mapping = {
+    'calories': 'calories',
+    'protein': 'protein',
+    'carbohydrates': 'carbohydrate',  # Singular form
+    'fat': 'fat',
+    'fiber': 'fiber',
+    'sugar': 'sugar',
+    'sodium': 'sodium'
+}
 
 def recommend_food_for_user(combined_df, df_food_details, expected_recommendation, user_id, top_n=6):
     """
-    Generates top N food recommendations for a specified user based on their preferences and nutritional needs,
+    Generates top N food recommendations for the specified user based on their preferences and nutritional needs,
     giving 80% importance to nutritional needs and 20% to category preferences.
 
     Parameters:
-    - combined_df (pd.DataFrame): DataFrame containing user information and category preferences.
-    - df_food_details (pd.DataFrame): DataFrame containing food item details.
-    - expected_recommendation (dict): Dictionary mapping user_id to expected foodItemId and categoryId.
-    - user_id (int): The ID of the user to generate recommendations for.
+    - combined_df (pd.DataFrame): DataFrame containing user information, category preferences, and nutritional needs.
+    - df_food_details (pd.DataFrame): DataFrame containing food item details and nutritional information.
+    - expected_recommendation (dict): Dictionary mapping user_id to expected foodItemId, categoryId, and preference.
+    - user_id (int): The ID of the user for whom to generate recommendations.
     - top_n (int): Number of top recommendations to generate.
 
     Returns:
     - pd.DataFrame: DataFrame containing the top recommended dishes with rankings and scores.
     """
-    logger.info("Combined DataFrame:")
-    logger.info(combined_df)
-    logger.info("Food Details DataFrame:")
-    logger.info(df_food_details)
-    logger.info(f"Expected Recommendations for User {user_id}: {expected_recommendation.get(user_id, {})}")
+    print(f"Generating recommendations for User ID: {user_id}")
 
-    logger.info(f"Generating recommendations for User ID: {user_id}")
-
-    if user_id not in expected_recommendation:
-        logger.warning(f"No expected recommendations found for User ID {user_id}.")
-        return pd.DataFrame()
-
+    # Extract user data
     user_data = combined_df[combined_df['user_id'] == user_id]
     if user_data.empty:
-        logger.warning(f"No data found for User ID {user_id}.")
-        return pd.DataFrame()
+        print(f"No data found for User ID {user_id}.")
+        return pd.DataFrame()  # Return empty DataFrame
 
     user_data = user_data.iloc[0]
     menu_data = df_food_details.copy()
 
-    expected_food_ids = expected_recommendation[user_id]['foodItemId']
-    expected_categories = expected_recommendation[user_id]['categoryId']
+    # Extract user expected categories and preferences
+    expected_food_ids = expected_recommendation.get(user_id, {}).get('foodItemId', [])
+    expected_categories = expected_recommendation.get(user_id, {}).get('categoryId', [])
+    preferences = expected_recommendation.get(user_id, {}).get('preference', [])
 
-    category_weight = 0.2
+    # Map foodItemId to preference
+    food_preference_map = dict(zip(expected_food_ids, preferences))
+    menu_data['preference'] = menu_data['foodItemId'].map(food_preference_map).fillna(0).astype(int)
+
+    # 1. Calculate Preference Score
+    menu_data['preference_score'] = menu_data['preference']  # 1 for like, 0 for dislike
+
+    # 2. Calculate Nutrient Match Score
+    # Normalize nutritional features based on user needs
+    user_nutritional_needs = {}
+    missing_nutrients = []
+    for nutrient, column_name in nutrient_column_mapping.items():
+        value = user_data.get(column_name, None)
+        if value is not None and value > 0:
+            user_nutritional_needs[nutrient] = value
+        else:
+            missing_nutrients.append(nutrient)
+
+    if missing_nutrients:
+        print(f"Missing or invalid nutritional needs for User ID {user_id}: {missing_nutrients}")
+        return pd.DataFrame()  # Return empty DataFrame
+
+    # Calculate nutrient match ratios, capped at 1.0
+    for nutrient in nutritional_weights.keys():
+        if nutrient in user_nutritional_needs:
+            target = user_nutritional_needs[nutrient]
+            match_feature = f'match_{nutrient}'
+            menu_data[match_feature] = menu_data.apply(
+                lambda row: min(row.get(nutrient, 0) / target, 1.0) if row.get(nutrient, 0) > 0 else 0.0,
+                axis=1
+            )
+        else:
+            # If the nutrient is not considered, set match to 0
+            match_feature = f'match_{nutrient}'
+            menu_data[match_feature] = 0.0
+
+    # Weighted nutrient match score
+    menu_data['nutrient_score'] = 0.0
+    for nutrient, weight in nutritional_weights.items():
+        match_feature = f'match_{nutrient}'
+        menu_data['nutrient_score'] += menu_data[match_feature] * weight
+
+    # Define composite score
+    menu_data['composite_score'] = (
+        nutrition_weight * menu_data['nutrient_score'] +
+        category_weight_percent * menu_data['preference_score']
+    )
+
+    # Feature Engineering: Include category preferences
     category_features = [col for col in menu_data.columns if col.startswith("category") and col != 'categoryId']
 
-    for category in category_features:
-        if category in user_data:
-            menu_data[category] = menu_data[category] * user_data[category] * category_weight
-
-    nutritional_features = ['calories', 'protein', 'carbohydrates', 'fat', 'fiber', 'sugar', 'sodium']
-    nutrition_weight = 0.8
-    nutritional_features_present = [feature for feature in nutritional_features if feature in menu_data.columns]
-
-    for feature in nutritional_features_present:
-        menu_data[feature] = menu_data[feature] * nutrition_weight
-
-    imputer = SimpleImputer(strategy='mean')
-    menu_data[category_features + nutritional_features_present] = imputer.fit_transform(menu_data[category_features + nutritional_features_present])
-
-    if 'categoryId' in menu_data.columns:
-        menu_data['categoryId'] = menu_data['categoryId'].dropna().astype(int)
+    # Normalize category weights based on user preferences
+    total_category_preference = user_data[category_features].sum()
+    if total_category_preference > 0:
+        category_weights_user = user_data[category_features] / total_category_preference * category_weight_percent
     else:
-        logger.warning("categoryId column is missing in menu_data.")
-        return pd.DataFrame()
+        category_weights_user = pd.Series(0.0, index=category_features)
 
+    print(f"Category weights for User ID {user_id}:")
+    print(category_weights_user)
+
+    # Apply category weights to menu_data
+    menu_data[category_features] = menu_data[category_features].multiply(category_weights_user, axis=1)
+
+    # List of match features
+    match_features = [f'match_{nutrient}' for nutrient in nutritional_weights.keys()]
+
+    # Select only relevant numeric features for imputation and scaling
+    numeric_features = category_features + match_features + ['preference_score', 'nutrient_score']
+
+    # Check and list features to impute (only numeric)
+    features_to_impute = [col for col in numeric_features if menu_data[col].isnull().any()]
+
+    if features_to_impute:
+        print(f"Imputing missing values for features: {features_to_impute}")
+        imputer = SimpleImputer(strategy='mean')
+        # Ensure only numeric data is imputed
+        menu_data[features_to_impute] = imputer.fit_transform(menu_data[features_to_impute])
+    else:
+        print("No missing values found in numeric features.")
+
+    # Feature Scaling
     scaler = StandardScaler()
-    scaling_features = category_features + nutritional_features_present
-    try:
-        menu_data[scaling_features] = scaler.fit_transform(menu_data[scaling_features])
-    except ValueError as ve:
-        logger.error(f"StandardScaler encountered an error: {ve}")
-        return pd.DataFrame()
+    # Select features for scaling: category features and match features
+    scaling_features = category_features + match_features
+    menu_data[scaling_features] = scaler.fit_transform(menu_data[scaling_features])
 
     # Prepare training data
     X = menu_data[scaling_features]
-    y = menu_data['categoryId']  # Using categoryId as target
+    y = menu_data['composite_score']
 
     # Initialize and train the Regression model
     svr = SVR(kernel='rbf')
@@ -352,100 +432,81 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
             database=DB_NAME,
             user=DB_USER,
             password=DB_PASSWORD
-            # ssl_context=ssl.create_default_context()  # Uncomment if SSL is required
         )
         cursor = connection.cursor()
 
         # Insert recommendations into the database
         for _, row in top_dishes_with_scores.iterrows():
+            # Explicitly cast to Python int to ensure compatibility
+            user_id_int = int(row['user_id'])
+            food_detail_id_int = int(row['food_detail_id'])
+            rank_int = int(row['Rank'])
+
+            # Debugging statement to verify types and values
+            print(f"Inserting user_id: {user_id_int} (type: {type(user_id_int)}), "
+                  f"food_detail_id: {food_detail_id_int} (type: {type(food_detail_id_int)}), "
+                  f"rank: {rank_int} (type: {type(rank_int)})")
+
             query = '''
             INSERT INTO app_user.user_food_recommendations (user_id, food_detail_id, rank)
             VALUES (%s, %s, %s)
             '''
-            cursor.execute(query, (row['user_id'], row['food_detail_id'], row['Rank']))
+            cursor.execute(query, (user_id_int, food_detail_id_int, rank_int))
 
         connection.commit()
-        logger.info("Top recommended dishes have been successfully pushed to the database.")
+        print("Top recommended dishes have been successfully pushed to the database.")
     except Exception as e:
-        logger.error(f"An error occurred while pushing recommendations to the database: {e}")
+        print(f"An error occurred while pushing recommendations to the database: {e}")
     finally:
         if connection:
             connection.close()
 
-    logger.info("\nTop Recommended Dishes with Scores:")
-    logger.info(top_dishes_with_scores)
-
-    # Return the DataFrame
+    print("\nTop Recommended Dishes with Scores:")
+    print(top_dishes_with_scores)
     return top_dishes_with_scores
 
+
+# API Endpoint
 @app.post("/recommendations", response_model=RecommendationResponse)
 async def get_recommendations(request: RecommendationRequest):
-    """
-    Endpoint to get food recommendations for a specified user.
-    """
     # Extract user_id from the request
     user_id = request.user_id
-    logger.info(f"Received recommendation request for user_id: {user_id}")
-
     # Construct the external URL with the provided user_id
     external_url = f"https://app-ivqcpctaoq-uc.a.run.app/dev/food/{user_id}/available"
-
+    
     # Make an asynchronous GET request to the external URL
     async with httpx.AsyncClient() as client:
         try:
             external_response = await client.get(external_url)
             external_response.raise_for_status()
             available_foods = external_response.json()
-
-            logger.info(f"Available foods for user {user_id}: {available_foods}")
-
-            # Ensure available_foods is a list of integers
-            if not isinstance(available_foods, list):
-                logger.error("External API did not return a list.")
-                raise HTTPException(status_code=500, detail="Invalid data format received from external service.")
-
-            try:
-                available_foods = [int(food_id) for food_id in available_foods]
-            except ValueError:
-                logger.error("Non-integer foodItemId values received.")
-                raise HTTPException(status_code=500, detail="Invalid foodItemId values received from external service.")
-
+            
+            # Process available_foods as needed
             df_food_details = fetch_and_transform_food_data()
             if available_foods:
                 df_food_details = df_food_details[df_food_details['foodItemId'].isin(available_foods)]
-                logger.info(f"Filtered food details count: {len(df_food_details)}")
             else:
-                logger.warning("No available foods found for the user.")
                 raise HTTPException(status_code=404, detail="No available foods found for the user.")
-
-            if df_food_details.empty:
-                logger.warning("Filtered food details are empty after applying available_foods.")
-                raise HTTPException(status_code=404, detail="No matching food items found for recommendations.")
-
         except httpx.HTTPStatusError as http_exc:
-            logger.error(f"HTTP error while fetching available foods: {http_exc}")
             raise HTTPException(status_code=http_exc.response.status_code, detail=f"Error fetching available foods: {http_exc.response.text}")
         except Exception as e:
-            logger.error(f"An error occurred while fetching available foods: {e}")
             raise HTTPException(status_code=500, detail=f"An error occurred while fetching available foods: {str(e)}")
-
+    
     # Proceed with existing recommendation logic
     combined_df = fetch_data_user_data()
     expected_recommendation = fetch_and_transform_swipe_data()
 
     # Verify user existence
     if user_id not in expected_recommendation:
-        logger.warning(f"No recommendation data available for user {user_id}")
         raise HTTPException(status_code=404, detail=f"No recommendation data available for user {user_id}")
 
     if user_id not in combined_df['user_id'].values:
-        logger.warning(f"No user health data found for user {user_id}")
         raise HTTPException(status_code=404, detail=f"No user health data found for user {user_id}")
 
     try:
         top_n = 6  # Default value; adjust as needed
 
-        logger.info(f"Generating top {top_n} recommendations for user_id: {user_id}")
+        print(f"Selected User ID for recommendations: {user_id}")
 
         recommendations_df = recommend_food_for_user(
             combined_df=combined_df,
@@ -456,19 +517,14 @@ async def get_recommendations(request: RecommendationRequest):
         )
 
         if recommendations_df.empty:
-            logger.warning(f"No recommendations available for user {user_id}")
             raise HTTPException(status_code=404, detail=f"No recommendations available for user {user_id}")
 
         # Convert the recommendations to a list of dictionaries
         data = recommendations_df.to_dict(orient='records')
 
-        logger.info(f"Successfully generated recommendations for user_id {user_id}: {data}")
-
         return {"message": "Recommendations fetched successfully", "data": data}
 
     except HTTPException as http_exc:
-        logger.error(f"HTTPException: {http_exc.detail}")
         raise http_exc
     except Exception as e:
-        logger.error(f"An error occurred during recommendation generation: {e}")
         raise HTTPException(status_code=500, detail=str(e))
