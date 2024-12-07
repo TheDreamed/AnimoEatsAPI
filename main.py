@@ -504,7 +504,7 @@ async def get_recommendations(request: RecommendationRequest):
 
         # Ensure user_id is an integer (already ensured by Pydantic, but converting just in case)
         user_id = int(user_id)
-        top_n = 6  # Default value; adjust as needed
+        top_n = 20  # Default value; adjust as needed
 
         print(f"Generating top {top_n} recommendations for User ID: {user_id}")
 
