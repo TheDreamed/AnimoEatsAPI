@@ -449,10 +449,10 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
         if connection:
             connection.close()
             
-    return top_dishes_with_scores
+    
     print("\nTop Recommended Dishes with Nutritional Information:")
     print(top_dishes_with_scores)
-
+    return top_dishes_with_scores
     # Return the DataFrame
 
 
