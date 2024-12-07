@@ -4,7 +4,8 @@ import pandas as pd
 import pg8000
 import os
 from dotenv import load_dotenv
-from sklearn.svm import SVC
+import numpy as np
+from sklearn.svm import SVR
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 
