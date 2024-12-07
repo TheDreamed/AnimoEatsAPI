@@ -214,10 +214,7 @@ class RecommendationResponse(BaseModel):
 def recommend_food_for_user(combined_df, df_food_details, expected_recommendation, user_id, top_n=6):
 
 
-    # Fetch data once at startup
-    combined_df = fetch_data_user_data()  
-    df_food_details = fetch_and_transform_food_data()
-    expected_recommendation = fetch_and_transform_swipe_data() 
+    # Fetch data once at startu
     print(combined_df)
     print(df_food_details)
     print(expected_recommendation)
@@ -341,6 +338,9 @@ async def get_recommendations():
     """
     Endpoint to get food recommendations for the latest user.
     """
+    combined_df = fetch_data_user_data()  
+    df_food_details = fetch_and_transform_food_data()
+    expected_recommendation = fetch_and_transform_swipe_data() 
     try:
         # Determine the user_id internally
         if not expected_recommendation:
