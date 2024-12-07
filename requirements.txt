@@ -7,3 +7,4 @@ python-dotenv==1.0.0
 scikit-learn==1.2.2
 httpx==0.24.0
 requests
+aiohttp
