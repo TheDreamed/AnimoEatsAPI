@@ -86,7 +86,7 @@ def fetch_data_user_data(user_id):
 
         # Combine the DataFrames
         combined_df = pd.concat([df_health, df_allergies, df_category_pivot], axis=1)
-
+        print(combined_df)
         return combined_df
 
     except Exception as e:
@@ -136,6 +136,7 @@ def fetch_and_transform_food_data(user_id):
         print("df_food_details columns after renaming:", df.columns.tolist())
 
         # Return the DataFrame with all data
+        print(df)
         return df
 
     except Exception as e:
@@ -217,14 +218,14 @@ def fetch_and_transform_swipe_data(user_id):
                 "categoryId": group["categoryId"].tolist(),
                 "preference": group["preference"].tolist()
             }
-
+        print(expected_recommendations)
         # Return the recommendations dictionary
         return expected_recommendations
-
+        
     except Exception as e:
         print(f"An error occurred: {e}")
         return {}
-
+    
     finally:
         if connection:
             connection.close()
