@@ -278,7 +278,7 @@ nutrient_column_mapping = {
     'sodium': 'sodium'
 }
 
-def recommend_food_for_user(combined_df, df_food_details, expected_recommendation, user_id, top_n=6):
+def recommend_food_for_user(combined_df, df_food_details, expected_recommendation, user_id, top_n=20):
     """
     Generates top N food recommendations for the specified user based on their preferences and nutritional needs,
     giving 80% importance to nutritional needs and 20% to category preferences.
