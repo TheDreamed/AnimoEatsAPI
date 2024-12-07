@@ -8,6 +8,7 @@ import numpy as np
 from sklearn.svm import SVR
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
+import httpx
 
 # Load environment variables
 load_dotenv()
