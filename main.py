@@ -39,7 +39,7 @@ category_mapping = {
     14: "categoryVegetable"
 }
 
-def fetch_data_user_data():
+def fetch_data_user_data(user_id):
     connection = None
     try:
         # Establish a connection to the PostgreSQL database
@@ -97,7 +97,7 @@ def fetch_data_user_data():
         if connection:
             connection.close()
 
-def fetch_and_transform_food_data():
+def fetch_and_transform_food_data(user_id):
     connection = None
     try:
         # Establish a connection to the PostgreSQL database
@@ -147,7 +147,7 @@ def fetch_and_transform_food_data():
             connection.close()
 
 
-def fetch_and_transform_swipe_data():
+def fetch_and_transform_swipe_data(user_id):
     """
     Fetches swipe data from the PostgreSQL database and transforms it into a dictionary
     that maps each user_id to their liked and disliked food items along with categories.
