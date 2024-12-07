@@ -185,15 +185,15 @@ def fetch_and_transform_swipe_data():
         df["preference"] = 1
 
         # Group by user_id and collect foodItemId and categoryId
-        expected_recommendations = {}
+        expected_recommendation = {}
         for user_id, group in df.groupby("user_id"):
-            expected_recommendations[user_id] = {
+            expected_recommendation[user_id] = {
                 "foodItemId": group["foodItemId"].tolist(),
                 "categoryId": group["categoryId"].tolist(),
             }
 
         # Return the recommendations dictionary
-        return expected_recommendations
+        return expected_recommendation
 
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -343,11 +343,11 @@ async def get_recommendations():
     """
     try:
         # Determine the user_id internally
-        if not expected_recommendations:
+        if not expected_recommendation:
             raise HTTPException(status_code=404, detail="No recommendations available.")
 
         # For demonstration, select the latest user_id
-        user_id = max(expected_recommendations.keys())
+        user_id = max(expected_recommendation.keys())
         top_n = 6  # Default value; adjust as needed
 
         print(f"Selected User ID for recommendations: {user_id}")
@@ -355,7 +355,7 @@ async def get_recommendations():
         recommendations_df = recommend_food_for_user(
             combined_df=combined_df,
             df_food_details=df_food_details,
-            expected_recommendation=expected_recommendations,
+            expected_recommendation=expected_recommendation,
             user_id=user_id,       # Pass the internally determined user_id
             top_n=top_n
         )
