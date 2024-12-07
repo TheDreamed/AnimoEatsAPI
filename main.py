@@ -419,6 +419,8 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     top_dishes_with_scores.rename(columns={'foodItemId': 'food_detail_id', 'predicted_score': 'score'}, inplace=True)
     top_dishes_with_scores['user_id'] = user_id
 
+    return top_dishes_with_scores
+
     # Push to the database
     connection = None
     try:
@@ -448,7 +450,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
             connection.close()
 
     print("\nTop Recommended Dishes with Nutritional Information:")
-    print(top_dishes_with_nutrients)
+    print(top_dishes_with_scores)
 
     # Return the DataFrame
 
