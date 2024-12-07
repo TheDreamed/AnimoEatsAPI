@@ -217,7 +217,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     # Fetch data once at startup
     combined_df = fetch_data_user_data()  
     df_food_details = fetch_and_transform_food_data()
-    expected_recommendations = fetch_and_transform_swipe_data() 
+    expected_recommendation = fetch_and_transform_swipe_data() 
     print(combined_df)
     print(df_food_details)
     print(expected_recommendation)
