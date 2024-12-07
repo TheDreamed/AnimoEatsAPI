@@ -470,44 +470,70 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
 # API Endpoint
 @app.post("/recommendations", response_model=RecommendationResponse)
 async def get_recommendations(request: RecommendationRequest):
-    # Extract user_id from the request
+    """
+    Endpoint to get food recommendations for a specified user.
+    """
     user_id = request.user_id
-    # Construct the external URL with the provided user_id
+    logger.info(f"Received recommendation request for user_id: {user_id}")
+
     external_url = f"https://app-ivqcpctaoq-uc.a.run.app/dev/food/{user_id}/available"
-    
+
     # Make an asynchronous GET request to the external URL
     async with httpx.AsyncClient() as client:
         try:
             external_response = await client.get(external_url)
             external_response.raise_for_status()
             available_foods = external_response.json()
-            
-            # Process available_foods as needed
+
+            logger.info(f"Available foods for user {user_id}: {available_foods}")
+
+            # Ensure available_foods is a list of integers
+            if not isinstance(available_foods, list):
+                logger.error("External API did not return a list.")
+                raise HTTPException(status_code=500, detail="Invalid data format received from external service.")
+
+            try:
+                available_foods = [int(food_id) for food_id in available_foods]
+            except ValueError:
+                logger.error("Non-integer foodItemId values received.")
+                raise HTTPException(status_code=500, detail="Invalid foodItemId values received from external service.")
+
             df_food_details = fetch_and_transform_food_data()
             if available_foods:
                 df_food_details = df_food_details[df_food_details['foodItemId'].isin(available_foods)]
+                logger.info(f"Filtered food details count: {len(df_food_details)}")
             else:
+                logger.warning("No available foods found for the user.")
                 raise HTTPException(status_code=404, detail="No available foods found for the user.")
+
+            if df_food_details.empty:
+                logger.warning("Filtered food details are empty after applying available_foods.")
+                raise HTTPException(status_code=404, detail="No matching food items found for recommendations.")
+
         except httpx.HTTPStatusError as http_exc:
+            logger.error(f"HTTP error while fetching available foods: {http_exc}")
             raise HTTPException(status_code=http_exc.response.status_code, detail=f"Error fetching available foods: {http_exc.response.text}")
         except Exception as e:
+            logger.error(f"An error occurred while fetching available foods: {e}")
             raise HTTPException(status_code=500, detail=f"An error occurred while fetching available foods: {str(e)}")
-    
+
     # Proceed with existing recommendation logic
     combined_df = fetch_data_user_data()
     expected_recommendation = fetch_and_transform_swipe_data()
 
     # Verify user existence
     if user_id not in expected_recommendation:
+        logger.warning(f"No recommendation data available for user {user_id}")
         raise HTTPException(status_code=404, detail=f"No recommendation data available for user {user_id}")
 
     if user_id not in combined_df['user_id'].values:
+        logger.warning(f"No user health data found for user {user_id}")
         raise HTTPException(status_code=404, detail=f"No user health data found for user {user_id}")
 
     try:
         top_n = 6  # Default value; adjust as needed
 
-        print(f"Selected User ID for recommendations: {user_id}")
+        logger.info(f"Generating top {top_n} recommendations for user_id: {user_id}")
 
         recommendations_df = recommend_food_for_user(
             combined_df=combined_df,
@@ -518,14 +544,20 @@ async def get_recommendations(request: RecommendationRequest):
         )
 
         if recommendations_df.empty:
+            logger.warning(f"No recommendations available for user {user_id}")
             raise HTTPException(status_code=404, detail=f"No recommendations available for user {user_id}")
 
         # Convert the recommendations to a list of dictionaries
         data = recommendations_df.to_dict(orient='records')
 
+        logger.info(f"Successfully generated recommendations for user_id {user_id}: {data}")
+
         return {"message": "Recommendations fetched successfully", "data": data}
 
     except HTTPException as http_exc:
+        logger.error(f"HTTPException: {http_exc.detail}")
         raise http_exc
     except Exception as e:
+        logger.error(f"An error occurred during recommendation generation: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
