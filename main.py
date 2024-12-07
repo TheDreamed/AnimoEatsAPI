@@ -211,37 +211,40 @@ class RecommendationResponse(BaseModel):
     data: list
 
 # Recommendation logic (simplified for API use)
-def recommend_food_for_user(combined_df, df_food_details, expected_recommendation, user_id, top_n=6):
+# Define specific weights for nutritional features
+nutritional_weights = {
+    'calories': 0.5,      # 50% of 80% weight
+    'protein': 0.2,       # 20% of 80% weight
+    'carbohydrates': 0.1, # 10% of 80% weight
+    'fat': 0.1,           # 10% of 80% weight
+    'fiber': 0.05,        # 5% of 80% weight
+    'sugar': 0.05,        # 5% of 80% weight
+    'sodium': 0.0         # 0% weight for sodium (not considered for recommendation)
+}
 
-
-    # Fetch data once at startu
-    print(combined_df)
-    print(df_food_details)
-    print(expected_recommendation)
+def recommend_food_for_user(combined_df, df_food_details, expected_recommendation, top_n=6):
     """
-    Generates top N food recommendations for a specified user based on their preferences and pushes the recommendations
+    Generates top N food recommendations for the latest user based on their preferences and pushes the recommendations
     to the app_user.user_food_recommendations table.
 
     Parameters:
     - combined_df (pd.DataFrame): DataFrame containing user information and category preferences.
     - df_food_details (pd.DataFrame): DataFrame containing food item details.
     - expected_recommendation (dict): Dictionary mapping user_id to expected foodItemId and categoryId.
-    - user_id (int): The ID of the user to generate recommendations for.
     - top_n (int): Number of top recommendations to generate.
 
     Returns:
-    - top_dishes_with_nutrients (pd.DataFrame): DataFrame containing the top recommended dishes.
+    - pd.DataFrame: DataFrame containing the top recommended dishes with rankings.
     """
-    print(f"Generating recommendations for User ID: {user_id}")
+    # Use the latest user_id from expected_recommendation
+    user_id = max(expected_recommendation.keys())  # Get the latest user_id
+    print(f"Generating recommendations for the latest User ID: {user_id}")
 
-    if user_id not in expected_recommendation:
-        print(f"No expected recommendations found for User ID {user_id}.")
-        return pd.DataFrame()
-
+    # Extract user data
     user_data = combined_df[combined_df['user_id'] == user_id]
     if user_data.empty:
         print(f"No data found for User ID {user_id}.")
-        return pd.DataFrame()
+        return
 
     user_data = user_data.iloc[0]
     menu_data = df_food_details.copy()
@@ -249,53 +252,68 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     expected_food_ids = expected_recommendation[user_id]['foodItemId']
     expected_categories = expected_recommendation[user_id]['categoryId']
 
-    category_weight = 0.2
+    # Apply category weights
+    category_weight = 0.2  # 20% weight for categories
     category_features = [col for col in menu_data.columns if col.startswith("category") and col != 'categoryId']
 
     for category in category_features:
         if category in user_data:
             menu_data[category] = menu_data[category] * user_data[category] * category_weight
 
+    # Apply nutritional weights
+    nutrition_weight = 0.8  # 80% weight for nutritional features
     nutritional_features = ['calories', 'protein', 'carbohydrates', 'fat', 'fiber', 'sugar', 'sodium']
-    nutrition_weight = 0.8
     nutritional_features_present = [feature for feature in nutritional_features if feature in menu_data.columns]
 
     for feature in nutritional_features_present:
-        menu_data[feature] = menu_data[feature] * nutrition_weight
+        weight = nutritional_weights.get(feature, 0.0)  # Default to 0.0 if weight not defined
+        menu_data[feature] = menu_data[feature] * weight * nutrition_weight
 
+    # Impute missing values
     imputer = SimpleImputer(strategy='mean')
-    menu_data[category_features + nutritional_features_present] = imputer.fit_transform(menu_data[category_features + nutritional_features_present])
+    features_to_impute = category_features + nutritional_features_present
+    menu_data[features_to_impute] = imputer.fit_transform(menu_data[features_to_impute])
 
+    # Ensure 'categoryId' is integer
     if 'categoryId' in menu_data.columns:
         menu_data['categoryId'] = menu_data['categoryId'].dropna().astype(int)
     else:
-        print("categoryId column is missing in menu_data.")
-        return pd.DataFrame()
+        print("Error: 'categoryId' column is missing in df_food_details.")
+        return
 
+    # Scale features
     scaler = StandardScaler()
-    menu_data[category_features + nutritional_features_present] = scaler.fit_transform(menu_data[category_features + nutritional_features_present])
+    menu_data[features_to_impute] = scaler.fit_transform(menu_data[features_to_impute])
 
+    # Prepare training data for SVM
     menu_data['target_category'] = menu_data['categoryId']
-    X = menu_data[category_features + nutritional_features_present]
+    X = menu_data[features_to_impute]
     y = menu_data['target_category']
 
+    # Initialize and train the SVM classifier
     svm = SVC(probability=True, random_state=42)
     svm.fit(X, y)
 
+    # Predict probabilities for each category
     probabilities = svm.predict_proba(X)
     predictions_df = df_food_details.loc[X.index].reset_index(drop=True)
 
+    # Assign predicted categories and their probabilities
     predictions_df['predicted_category'] = svm.predict(X)
     category_labels = svm.classes_
     category_probabilities = pd.DataFrame(probabilities, columns=[f"prob_{cls}" for cls in category_labels])
     predictions_df = pd.concat([predictions_df, category_probabilities], axis=1)
 
+    # Determine the maximum probability for ranking
     predictions_df['max_probability'] = probabilities.max(axis=1)
     top_recommended_dishes = predictions_df.sort_values(by='max_probability', ascending=False).head(top_n)
 
+    # Assign rankings
     top_recommended_dishes['Rank'] = range(1, top_n + 1)
-    top_dishes_with_nutrients = top_recommended_dishes[['Rank', 'foodItemId']]
-    top_dishes_with_nutrients.rename(columns={'foodItemId': 'food_detail_id'}, inplace=True)  # Rename column
+
+    # Prepare the final DataFrame for recommendations
+    top_dishes_with_nutrients = top_recommended_dishes[['Rank', 'foodItemId']].copy()
+    top_dishes_with_nutrients.rename(columns={'foodItemId': 'food_detail_id'}, inplace=True)
     top_dishes_with_nutrients['user_id'] = user_id
 
     # Push to the database
