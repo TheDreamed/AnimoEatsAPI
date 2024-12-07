@@ -474,45 +474,62 @@ async def get_recommendations(request: RecommendationRequest):
         user_id = request.user_id  # Assign user_id from request first
         print(f"Received request for User ID: {user_id}")
 
-        #If you need to use the external URL to fetch data, uncomment and implement the following:
+        # Construct the external URL with the provided user_id
         external_url = f"https://app-ivqcpctaoq-uc.a.run.app/dev/food/{user_id}/available"
+
+        # Fetch data from the external URL
         async with aiohttp.ClientSession() as session:
             async with session.get(external_url) as response:
                 if response.status != 200:
-                    raise HTTPException(status_code=response.status, detail="Failed to fetch external data.")
+                    raise HTTPException(
+                        status_code=response.status,
+                        detail="Failed to fetch external data."
+                    )
                 external_data = await response.json()
-                # Process external_data as needed
-    
-    combined_df = fetch_data_user_data()  
-    df_food_details = fetch_and_transform_food_data()
-    expected_recommendation = fetch_and_transform_swipe_data() 
-    try:
-        # Determine the user_id internally
-        if not expected_recommendation:
+                # TODO: Process external_data as needed
+                # For example, you might integrate external_data into your dataframes
+
+        # Fetch and transform data
+        combined_df = fetch_data_user_data(user_id)
+        df_food_details = fetch_and_transform_food_data(user_id)
+        expected_recommendation = fetch_and_transform_swipe_data(user_id)
+
+        if expected_recommendation.empty:
             raise HTTPException(status_code=404, detail="No recommendations available.")
-            
-        user_id = int(user_id)  # Ensure user_id is an integer
+
+        # Ensure user_id is an integer (already ensured by Pydantic, but converting just in case)
+        user_id = int(user_id)
         top_n = 6  # Default value; adjust as needed
 
-        print(f"Selected User ID for recommendations: {user_id}")
+        print(f"Generating top {top_n} recommendations for User ID: {user_id}")
 
+        # Generate recommendations
         recommendations_df = recommend_food_for_user(
             combined_df=combined_df,
             df_food_details=df_food_details,
             expected_recommendation=expected_recommendation,
-            user_id=user_id,       # Pass the internally determined user_id
+            user_id=user_id,
             top_n=top_n
         )
 
         if recommendations_df.empty:
-            raise HTTPException(status_code=404, detail=f"No recommendations available for user {user_id}")
+            raise HTTPException(
+                status_code=404,
+                detail=f"No recommendations available for user {user_id}"
+            )
 
         # Convert the recommendations to a list of dictionaries
         data = recommendations_df.to_dict(orient='records')
 
-        return {"message": "Recommendations fetched successfully", "data": data}
+        return RecommendationResponse(
+            message="Recommendations fetched successfully",
+            data=data
+        )
 
     except HTTPException as http_exc:
+        # Re-raise HTTP exceptions to be handled by FastAPI
         raise http_exc
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        # Log the exception details as needed
+        print(f"An unexpected error occurred: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
