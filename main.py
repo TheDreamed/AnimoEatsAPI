@@ -40,8 +40,7 @@ category_mapping = {
     14: "categoryVegetable"
 }
 
-class RecommendationRequest(BaseModel):
-    user_id: int
+
 def fetch_data_user_data():
     connection = None
     try:
@@ -234,10 +233,8 @@ def fetch_and_transform_swipe_data():
 
 
 
-# Response model
-class RecommendationResponse(BaseModel):
-    message: str
-    data: list
+class RecommendationRequest(BaseModel):
+    user_id: int
 
 # Recommendation logic (simplified for API use)
 # Define specific weights for nutritional features
@@ -467,7 +464,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
 
 
 # API Endpoint
-@app.post("/recommendations", response_model=RecommendationResponse)
+@app.post("/recommendations")
 async def get_recommendations(request: RecommendationRequest):
     # Extract user_id from the request
     user_id = request.user_id
