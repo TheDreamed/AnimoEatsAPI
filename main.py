@@ -481,9 +481,7 @@ async def get_recommendations(request: RecommendationRequest):
         # Determine the user_id internally
         if not expected_recommendation:
             raise HTTPException(status_code=404, detail="No recommendations available.")
-
-        # For demonstration, select the latest user_id
-        user_id = max(expected_recommendation.keys())
+            
         user_id = int(user_id)  # Ensure user_id is an integer
         top_n = 6  # Default value; adjust as needed
 
