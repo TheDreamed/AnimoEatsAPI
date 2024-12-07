@@ -147,6 +147,14 @@ def fetch_and_transform_food_data():
 
 
 def fetch_and_transform_swipe_data():
+    """
+    Fetches swipe data from the PostgreSQL database and transforms it into a dictionary
+    that maps each user_id to their liked and disliked food items along with categories.
+
+    Returns:
+        dict: A dictionary where each key is a user_id and the value is another dictionary
+              containing lists of foodItemId, categoryId, and preference (1 for like, 0 for dislike).
+    """
     connection = None
     try:
         # Establish a connection to the PostgreSQL database
@@ -174,26 +182,43 @@ def fetch_and_transform_swipe_data():
         # Convert to DataFrame
         df = pd.DataFrame(data, columns=column_names)
 
-        # Rename columns
-        df.rename(columns={"userId": "user_id", "categoryId": "categoryId", "foodItemId": "foodItemId"}, inplace=True)
+        # Rename columns for consistency
+        df.rename(columns={
+            "userId": "user_id",
+            "foodItemId": "foodItemId",
+            "categoryId": "categoryId"
+        }, inplace=True)
 
-        # Map categoryId to category names (if category_mapping is provided)
-        df["categoryId"] = df["categoryId"].map(category_mapping)
+        # Map categoryId to category names if category_mapping is provided
+        if "category_mapping" in globals() and callable(category_mapping):
+            df["categoryId"] = df["categoryId"].map(category_mapping)
+        else:
+            # If no mapping is provided, you can choose to keep the ID or handle accordingly
+            pass
 
-        # Filter rows where preference is 'like' and convert it to 1
-        df = df[df["preference"] == "like"]
-        df["preference"] = 1
+        # Map 'like' to 1 and 'dislike' to 0
+        df["preference"] = df["preference"].map({
+            "like": 1,
+            "dislike": 0
+        })
 
-        # Group by user_id and collect foodItemId and categoryId
-        expected_recommendation = {}
+        # Handle any unexpected preference values by setting them to a default (e.g., NaN) and dropping
+        df = df.dropna(subset=["preference"])
+
+        # Convert preferences to integer type
+        df["preference"] = df["preference"].astype(int)
+
+        # Group by user_id and collect foodItemId, categoryId, and preference
+        expected_recommendations = {}
         for user_id, group in df.groupby("user_id"):
-            expected_recommendation[user_id] = {
+            expected_recommendations[user_id] = {
                 "foodItemId": group["foodItemId"].tolist(),
                 "categoryId": group["categoryId"].tolist(),
+                "preference": group["preference"].tolist()
             }
 
         # Return the recommendations dictionary
-        return expected_recommendation
+        return expected_recommendations
 
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -222,23 +247,49 @@ nutritional_weights = {
     'sodium': 0.0         # 0% weight for sodium (not considered for recommendation)
 }
 
+# Define weights
+nutrition_weight = 0.8
+category_weight_percent = 0.2
+
+# Define specific weights for nutritional features
+nutritional_weights = {
+    'calories': 0.5,      # 50% of 80% weight
+    'protein': 0.2,       # 20% of 80% weight
+    'carbohydrates': 0.1, # 10% of 80% weight
+    'fat': 0.1,           # 10% of 80% weight
+    'fiber': 0.05,        # 5% of 80% weight
+    'sugar': 0.05,        # 5% of 80% weight
+    'sodium': 0.0         # 0% weight for sodium
+}
+
+# Define a mapping from standardized nutrient names to combined_df column names
+nutrient_column_mapping = {
+    'calories': 'calories',
+    'protein': 'protein',
+    'carbohydrates': 'carbohydrate',  # Singular form
+    'fat': 'fat',
+    'fiber': 'fiber',
+    'sugar': 'sugar',
+    'sodium': 'sodium'
+}
+
 def recommend_food_for_user(combined_df, df_food_details, expected_recommendation, top_n=6):
     """
-    Generates top N food recommendations for the latest user based on their preferences and pushes the recommendations
-    to the app_user.user_food_recommendations table.
+    Generates top N food recommendations for the latest user based on their preferences and nutritional needs,
+    giving 80% importance to nutritional needs and 20% to category preferences.
 
     Parameters:
-    - combined_df (pd.DataFrame): DataFrame containing user information and category preferences.
-    - df_food_details (pd.DataFrame): DataFrame containing food item details.
-    - expected_recommendation (dict): Dictionary mapping user_id to expected foodItemId and categoryId.
+    - combined_df (pd.DataFrame): DataFrame containing user information, category preferences, and nutritional needs.
+    - df_food_details (pd.DataFrame): DataFrame containing food item details and nutritional information.
+    - expected_recommendation (dict): Dictionary mapping user_id to expected foodItemId, categoryId, and preference.
     - top_n (int): Number of top recommendations to generate.
 
     Returns:
-    - pd.DataFrame: DataFrame containing the top recommended dishes with rankings.
+    - pd.DataFrame: DataFrame containing the top recommended dishes with rankings and scores.
     """
     # Use the latest user_id from expected_recommendation
     user_id = max(expected_recommendation.keys())  # Get the latest user_id
-    print(f"Generating recommendations for the latest User ID: {user_id}")
+    print(f"Generating recommendations for User ID: {user_id}")
 
     # Extract user data
     user_data = combined_df[combined_df['user_id'] == user_id]
@@ -249,72 +300,123 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     user_data = user_data.iloc[0]
     menu_data = df_food_details.copy()
 
-    expected_food_ids = expected_recommendation[user_id]['foodItemId']
-    expected_categories = expected_recommendation[user_id]['categoryId']
+    # Extract user expected categories and preferences
+    expected_food_ids = expected_recommendation[user_id].get('foodItemId', [])
+    expected_categories = expected_recommendation[user_id].get('categoryId', [])
+    preferences = expected_recommendation[user_id].get('preference', [])
 
-    # Apply category weights
-    category_weight = 0.2  # 20% weight for categories
-    category_features = [col for col in menu_data.columns if col.startswith("category") and col != 'categoryId']
+    # Map foodItemId to preference
+    food_preference_map = dict(zip(expected_food_ids, preferences))
+    menu_data['preference'] = menu_data['foodItemId'].map(food_preference_map).fillna(0).astype(int)
 
-    for category in category_features:
-        if category in user_data:
-            menu_data[category] = menu_data[category] * user_data[category] * category_weight
+    # Define target variable as composite score
+    # Composite Score = (nutrition_weight * nutrient_score) + (category_weight_percent * preference_score)
 
-    # Apply nutritional weights
-    nutrition_weight = 0.8  # 80% weight for nutritional features
-    nutritional_features = ['calories', 'protein', 'carbohydrates', 'fat', 'fiber', 'sugar', 'sodium']
-    nutritional_features_present = [feature for feature in nutritional_features if feature in menu_data.columns]
+    # 1. Calculate Preference Score
+    menu_data['preference_score'] = menu_data['preference']  # 1 for like, 0 for dislike
 
-    for feature in nutritional_features_present:
-        weight = nutritional_weights.get(feature, 0.0)  # Default to 0.0 if weight not defined
-        menu_data[feature] = menu_data[feature] * weight * nutrition_weight
+    # 2. Calculate Nutrient Match Score
+    # Normalize nutritional features based on user needs
+    user_nutritional_needs = {}
+    missing_nutrients = []
+    for nutrient, column_name in nutrient_column_mapping.items():
+        value = user_data.get(column_name, None)
+        if value is not None and value > 0:
+            user_nutritional_needs[nutrient] = value
+        else:
+            missing_nutrients.append(nutrient)
 
-    # Impute missing values
-    imputer = SimpleImputer(strategy='mean')
-    features_to_impute = category_features + nutritional_features_present
-    menu_data[features_to_impute] = imputer.fit_transform(menu_data[features_to_impute])
-
-    # Ensure 'categoryId' is integer
-    if 'categoryId' in menu_data.columns:
-        menu_data['categoryId'] = menu_data['categoryId'].dropna().astype(int)
-    else:
-        print("Error: 'categoryId' column is missing in df_food_details.")
+    if missing_nutrients:
+        print(f"Missing or invalid nutritional needs for User ID {user_id}: {missing_nutrients}")
         return
 
-    # Scale features
+    # Calculate nutrient match ratios, capped at 1.0
+    for nutrient in nutritional_weights.keys():
+        if nutrient in user_nutritional_needs:
+            target = user_nutritional_needs[nutrient]
+            match_feature = f'match_{nutrient}'
+            menu_data[match_feature] = menu_data.apply(
+                lambda row: min(row[nutrient] / target, 1.0) if row[nutrient] > 0 else 0.0,
+                axis=1
+            )
+        else:
+            # If the nutrient is not considered, set match to 0
+            match_feature = f'match_{nutrient}'
+            menu_data[match_feature] = 0.0
+
+    # Weighted nutrient match score
+    menu_data['nutrient_score'] = 0.0
+    for nutrient, weight in nutritional_weights.items():
+        match_feature = f'match_{nutrient}'
+        menu_data['nutrient_score'] += menu_data[match_feature] * weight
+
+    # Define composite score
+    menu_data['composite_score'] = (nutrition_weight * menu_data['nutrient_score']) + (category_weight_percent * menu_data['preference_score'])
+
+    # Define target variable
+    y = menu_data['composite_score']
+
+    # Feature Engineering: Include category preferences
+    category_features = [col for col in menu_data.columns if col.startswith("category") and col != 'categoryId']
+
+    # Normalize category weights based on user preferences
+    total_category_preference = user_data[category_features].sum()
+    if total_category_preference > 0:
+        category_weights_user = user_data[category_features] / total_category_preference * category_weight_percent
+    else:
+        category_weights_user = pd.Series(0.0, index=category_features)
+
+    print(f"Category weights for User ID {user_id}:")
+    print(category_weights_user)
+
+    # Apply category weights to menu_data
+    menu_data[category_features] = menu_data[category_features].multiply(category_weights_user, axis=1)
+
+    # List of match features
+    match_features = [f'match_{nutrient}' for nutrient in nutritional_weights.keys()]
+
+    # Select only relevant numeric features for imputation and scaling
+    numeric_features = category_features + match_features + ['preference_score', 'nutrient_score']
+
+    # Check and list features to impute (only numeric)
+    features_to_impute = [col for col in numeric_features if menu_data[col].isnull().any()]
+
+    if features_to_impute:
+        print(f"Imputing missing values for features: {features_to_impute}")
+        imputer = SimpleImputer(strategy='mean')
+        # Ensure only numeric data is imputed
+        menu_data[features_to_impute] = imputer.fit_transform(menu_data[features_to_impute])
+    else:
+        print("No missing values found in numeric features.")
+
+    # Feature Scaling
     scaler = StandardScaler()
-    menu_data[features_to_impute] = scaler.fit_transform(menu_data[features_to_impute])
+    # Select features for scaling: category features and match features
+    scaling_features = category_features + match_features
+    menu_data[scaling_features] = scaler.fit_transform(menu_data[scaling_features])
 
-    # Prepare training data for SVM
-    menu_data['target_category'] = menu_data['categoryId']
-    X = menu_data[features_to_impute]
-    y = menu_data['target_category']
+    # Prepare training data
+    X = menu_data[scaling_features]
+    y = menu_data['composite_score']
 
-    # Initialize and train the SVM classifier
-    svm = SVC(probability=True, random_state=42)
-    svm.fit(X, y)
+    # Initialize and train the Regression model
+    svr = SVR(kernel='rbf')
+    svr.fit(X, y)
 
-    # Predict probabilities for each category
-    probabilities = svm.predict_proba(X)
-    predictions_df = df_food_details.loc[X.index].reset_index(drop=True)
+    # Predict composite scores
+    menu_data['predicted_score'] = svr.predict(X)
 
-    # Assign predicted categories and their probabilities
-    predictions_df['predicted_category'] = svm.predict(X)
-    category_labels = svm.classes_
-    category_probabilities = pd.DataFrame(probabilities, columns=[f"prob_{cls}" for cls in category_labels])
-    predictions_df = pd.concat([predictions_df, category_probabilities], axis=1)
-
-    # Determine the maximum probability for ranking
-    predictions_df['max_probability'] = probabilities.max(axis=1)
-    top_recommended_dishes = predictions_df.sort_values(by='max_probability', ascending=False).head(top_n)
+    # Sort based on predicted scores
+    top_recommended_dishes = menu_data.sort_values(by='predicted_score', ascending=False).head(top_n)
 
     # Assign rankings
+    top_recommended_dishes = top_recommended_dishes.copy()
     top_recommended_dishes['Rank'] = range(1, top_n + 1)
 
     # Prepare the final DataFrame for recommendations
-    top_dishes_with_nutrients = top_recommended_dishes[['Rank', 'foodItemId']].copy()
-    top_dishes_with_nutrients.rename(columns={'foodItemId': 'food_detail_id'}, inplace=True)
-    top_dishes_with_nutrients['user_id'] = user_id
+    top_dishes_with_scores = top_recommended_dishes[['Rank', 'foodItemId', 'predicted_score']].copy()
+    top_dishes_with_scores.rename(columns={'foodItemId': 'food_detail_id', 'predicted_score': 'score'}, inplace=True)
+    top_dishes_with_scores['user_id'] = user_id
 
     # Push to the database
     connection = None
