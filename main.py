@@ -5,7 +5,7 @@ import pg8000
 import os
 from dotenv import load_dotenv
 import numpy as np
-from sklearn.svm import SVR
+from sklearn.svm import SVR, SVC
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 import aiohttp
