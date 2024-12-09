@@ -262,17 +262,6 @@ nutritional_weights = {
 nutrition_weight = 0.8
 category_weight_percent = 0.2
 
-# Define specific weights for nutritional features
-nutritional_weights = {
-    'calories': 0.5,      # 50% of 80% weight
-    'protein': 0.2,       # 20% of 80% weight
-    'carbohydrates': 0.1, # 10% of 80% weight
-    'fat': 0.1,           # 10% of 80% weight
-    'fiber': 0.05,        # 5% of 80% weight
-    'sugar': 0.05,        # 5% of 80% weight
-    'sodium': 0.0         # 0% weight for sodium
-}
-
 # Define a mapping from standardized nutrient names to combined_df column names
 nutrient_column_mapping = {
     'calories': 'calories',
@@ -338,15 +327,17 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
         print(f"Missing or invalid nutritional needs for User ID {user_id}: {missing_nutrients}")
         return pd.DataFrame()  # Return empty DataFrame
 
-    # Calculate nutrient match ratios, capped at 1.0
+    # Calculate nutrient match ratios, normalize using Min-Max scaling
     for nutrient in nutritional_weights.keys():
         if nutrient in user_nutritional_needs:
             target = user_nutritional_needs[nutrient]
             match_feature = f'match_{nutrient}'
             menu_data[match_feature] = menu_data.apply(
-                lambda row: min(row.get(nutrient, 0) / target, 1.0) if row.get(nutrient, 0) > 0 else 0.0,
+                lambda row: row.get(nutrient, 0) / target if target != 0 else 0.0,
                 axis=1
             )
+            # Cap the ratio between 0 and 1
+            menu_data[match_feature] = menu_data[match_feature].clip(upper=1.0)
         else:
             # If the nutrient is not considered, set match to 0
             match_feature = f'match_{nutrient}'
@@ -357,6 +348,10 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     for nutrient, weight in nutritional_weights.items():
         match_feature = f'match_{nutrient}'
         menu_data['nutrient_score'] += menu_data[match_feature] * weight
+
+    # Normalize nutrient_score to [0,1]
+    scaler_nutrient = MinMaxScaler()
+    menu_data['nutrient_score_normalized'] = scaler_nutrient.fit_transform(menu_data[['nutrient_score']])
 
     # 2. Train SVC for Preference Prediction
     # Prepare category features
@@ -378,18 +373,25 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     scaler_svc = StandardScaler()
     X_svc_scaled = scaler_svc.fit_transform(X_svc_imputed)
 
-    # Initialize and train the SVC model
+    # Hyperparameter Tuning for SVC
     svc = SVC(kernel='rbf', probability=True)
+    param_grid_svc = {
+        'C': [0.1, 1, 10],
+        'gamma': ['scale', 'auto'],
+        'kernel': ['rbf', 'linear']
+    }
+    grid_svc = GridSearchCV(svc, param_grid_svc, cv=5, scoring='f1', n_jobs=-1)
     try:
-        svc.fit(X_svc_scaled, y_svc)
+        grid_svc.fit(X_svc_scaled, y_svc)
+        best_svc = grid_svc.best_estimator_
+        print(f"Best SVC Parameters: {grid_svc.best_params_}")
     except Exception as e:
-        print(f"An error occurred while training SVC: {e}")
+        print(f"An error occurred during SVC training: {e}")
         return pd.DataFrame()
 
     # Predict preference probabilities
     try:
-        X_pred_svc = X_svc_scaled  # Using all menu items
-        preference_probs = svc.predict_proba(X_pred_svc)[:, 1]  # Probability of class '1' (like)
+        preference_probs = best_svc.predict_proba(X_svc_scaled)[:, 1]  # Probability of class '1' (like)
         menu_data['preference_score'] = preference_probs
     except NotFittedError as e:
         print(f"SVC model is not fitted: {e}")
@@ -398,15 +400,19 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
         print(f"An error occurred during SVC prediction: {e}")
         return pd.DataFrame()
 
+    # Normalize preference_score to [0,1]
+    scaler_pref = MinMaxScaler()
+    menu_data['preference_score_normalized'] = scaler_pref.fit_transform(menu_data[['preference_score']])
+
     # 3. Train SVR for Nutrient Matching
     # Prepare nutrient features
-    nutrient_features = [nutrient for nutrient in nutritional_weights.keys() if nutrient in menu_data.columns]
+    nutrient_features = [f'match_{nutrient}' for nutrient in nutritional_weights.keys()]
     if not nutrient_features:
         print("No nutrient features found for SVR.")
         return pd.DataFrame()
 
     X_svr = menu_data[nutrient_features]
-    y_svr = menu_data['nutrient_score']
+    y_svr = menu_data['nutrient_score_normalized']
 
     # Impute missing values
     imputer_svr = SimpleImputer(strategy='mean')
@@ -416,17 +422,27 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     scaler_svr = StandardScaler()
     X_svr_scaled = scaler_svr.fit_transform(X_svr_imputed)
 
-    # Initialize and train the SVR model
+    # Hyperparameter Tuning for SVR
     svr = SVR(kernel='rbf')
+    param_grid_svr = {
+        'C': [0.1, 1, 10],
+        'gamma': ['scale', 'auto'],
+        'epsilon': [0.1, 0.2, 0.5]
+    }
+    grid_svr = GridSearchCV(svr, param_grid_svr, cv=5, scoring='neg_mean_squared_error', n_jobs=-1)
     try:
-        svr.fit(X_svr_scaled, y_svr)
+        grid_svr.fit(X_svr_scaled, y_svr)
+        best_svr = grid_svr.best_estimator_
+        print(f"Best SVR Parameters: {grid_svr.best_params_}")
     except Exception as e:
-        print(f"An error occurred while training SVR: {e}")
+        print(f"An error occurred during SVR training: {e}")
         return pd.DataFrame()
 
     # Predict nutrient scores
     try:
-        predicted_nutrient_scores = svr.predict(X_svr_scaled)
+        predicted_nutrient_scores = best_svr.predict(X_svr_scaled)
+        # Ensure predicted scores are within [0,1]
+        predicted_nutrient_scores = np.clip(predicted_nutrient_scores, 0, 1)
         menu_data['predicted_nutrient_score'] = predicted_nutrient_scores
     except NotFittedError as e:
         print(f"SVR model is not fitted: {e}")
@@ -436,13 +452,17 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
         return pd.DataFrame()
 
     # 4. Combine SVC and SVR Predictions into Composite Score
+    # Normalize both scores to [0,1]
+    menu_data['preference_score_normalized'] = scaler_pref.transform(menu_data[['preference_score']])
+    menu_data['predicted_nutrient_score_normalized'] = scaler_nutrient.transform(menu_data[['predicted_nutrient_score']])
+
     # Define weights for SVC and SVR
-    svc_weight = 0.2  # 20% weight for preference
-    svr_weight = 0.8  # 80% weight for nutrient matching
+    svc_weight = 0.3  # 30% weight for preference
+    svr_weight = 0.7  # 70% weight for nutrient matching
 
     menu_data['composite_score'] = (
-        svc_weight * menu_data['preference_score'] +
-        svr_weight * menu_data['predicted_nutrient_score']
+        svc_weight * menu_data['preference_score_normalized'] +
+        svr_weight * menu_data['predicted_nutrient_score_normalized']
     )
 
     # 5. Generate Top N Recommendations
@@ -489,7 +509,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
                   f"rank: {rank_int} (type: {type(rank_int)}), score: {score_float} (type: {type(score_float)})")
 
             query = '''
-            INSERT INTO app_user.user_food_recommendations (user_id, food_detail_id, rank)
+            INSERT INTO app_user.user_food_recommendations (user_id, food_detail_id, rank, score)
             VALUES (%s, %s, %s, %s)
             ON CONFLICT (user_id, food_detail_id)
             DO UPDATE SET rank = EXCLUDED.rank, score = EXCLUDED.score;
@@ -507,7 +527,6 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     print("\nTop Recommended Dishes with Scores:")
     print(top_dishes_with_scores)
     return top_dishes_with_scores
-
 
 # API Endpoint
 @app.post("/recommendations", response_model=RecommendationResponse)
