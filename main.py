@@ -273,7 +273,10 @@ nutritional_weights = {
     'sodium': -0.3         # Negative weight for detrimental nutrient
 }
 
-# Define a mapping from standardized nutrient names to combined_df column names
+# Define which nutrients are beneficial and which are detrimental
+beneficial_nutrients = {'protein', 'fiber'}
+detrimental_nutrients = {'calories', 'fat', 'sugar', 'sodium'}
+
 nutrient_column_mapping = {
     'calories': 'calories',
     'protein': 'protein',
