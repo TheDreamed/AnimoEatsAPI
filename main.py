@@ -9,8 +9,7 @@ from sklearn.svm import SVR, SVC
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
-from sklearn.exceptions import NotFittedError
-from sklearn.metrics import accuracy_score, recall_score, f1_score, precision_score
+from sklearn.metrics import accuracy_score, mean_squared_error
 import aiohttp
 import joblib  # For model serialization
 
@@ -276,18 +275,10 @@ nutrient_column_mapping = {
     'sodium': 'sodium'
 }
 
-import pandas as pd
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import StandardScaler
-from sklearn.svm import SVC, SVR
-from sklearn.exceptions import NotFittedError
-from sklearn.metrics import accuracy_score, recall_score, f1_score, precision_score
-
 def recommend_food_for_user(combined_df, df_food_details, expected_recommendation, user_id, top_n=20):
     """
     Generates top N food recommendations for the specified user based on their preferences and nutritional needs,
     using SVC for categorical preferences and SVR for nutritional matching, then combining them.
-    Additionally, calculates accuracy, recall, and F1 score based on expected recommendations.
 
     Parameters:
     - combined_df (pd.DataFrame): DataFrame containing user information, category preferences, and nutritional needs.
@@ -297,9 +288,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     - top_n (int): Number of top recommendations to generate.
 
     Returns:
-    - tuple: 
-        - pd.DataFrame: DataFrame containing the top recommended dishes with rankings and scores.
-        - dict: Dictionary containing accuracy, recall, and F1 score.
+    - pd.DataFrame: DataFrame containing the top recommended dishes with rankings and scores.
     """
     print(f"Generating recommendations for User ID: {user_id}")
 
@@ -307,7 +296,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     user_data = combined_df[combined_df['user_id'] == user_id]
     if user_data.empty:
         print(f"No data found for User ID {user_id}.")
-        return pd.DataFrame(), {'accuracy': None, 'precision': None, 'recall': None, 'f1_score': None}  # Return empty DataFrame and None metrics
+        return pd.DataFrame()  # Return empty DataFrame
 
     user_data = user_data.iloc[0]
     menu_data = df_food_details.copy()
@@ -324,7 +313,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     # Check if user has enough preferences to train SVC
     if menu_data['preference'].nunique() < 2:
         print("Not enough preference data to train SVC.")
-        return pd.DataFrame(), {'accuracy': None, 'precision': None, 'recall': None, 'f1_score': None}
+        return pd.DataFrame()
 
     # 1. Calculate Nutrient Match Score (Manual Calculation)
     user_nutritional_needs = {}
@@ -338,7 +327,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
 
     if missing_nutrients:
         print(f"Missing or invalid nutritional needs for User ID {user_id}: {missing_nutrients}")
-        return pd.DataFrame(), {'accuracy': None, 'precision': None, 'recall': None, 'f1_score': None}  # Return empty DataFrame and None metrics
+        return pd.DataFrame()  # Return empty DataFrame
 
     # Calculate nutrient match ratios, capped at 1.0
     for nutrient in nutritional_weights.keys():
@@ -367,7 +356,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     # Handle missing category features
     if not category_features:
         print("No category features found for SVC.")
-        return pd.DataFrame(), {'accuracy': None, 'precision': None, 'recall': None, 'f1_score': None}
+        return pd.DataFrame()
 
     X_svc = menu_data[category_features]
     y_svc = menu_data['preference']
@@ -383,49 +372,29 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     # Initialize and train the SVC model
     svc = SVC(kernel='rbf', probability=True)
     try:
-        # Split the data into training and testing sets for evaluation
-        from sklearn.model_selection import train_test_split
-        X_train_svc, X_test_svc, y_train_svc, y_test_svc = train_test_split(
-            X_svc_scaled, y_svc, test_size=0.2, random_state=42, stratify=y_svc
-        )
-        svc.fit(X_train_svc, y_train_svc)
-
-        # Predict on the test set
-        y_pred_svc = svc.predict(X_test_svc)
-
-        # Calculate metrics for SVC
-        accuracy = accuracy_score(y_test_svc, y_pred_svc)
-        precision = precision_score(y_test_svc, y_pred_svc, zero_division=0)
-        recall = recall_score(y_test_svc, y_pred_svc, zero_division=0)
-        f1 = f1_score(y_test_svc, y_pred_svc, zero_division=0)
-
-        print(f"SVC Model Evaluation Metrics:")
-        print(f"Accuracy: {accuracy:.4f}")
-        print(f"Precision: {precision:.4f}")
-        print(f"Recall: {recall:.4f}")
-        print(f"F1 Score: {f1:.4f}")
-
+        svc.fit(X_svc_scaled, y_svc)
     except Exception as e:
         print(f"An error occurred while training SVC: {e}")
-        return pd.DataFrame(), {'accuracy': None, 'precision': None, 'recall': None, 'f1_score': None}
+        return pd.DataFrame()
 
-    # 3. Predict preference probabilities on all menu items
+    # Predict preference probabilities
     try:
-        preference_probs = svc.predict_proba(X_svc_scaled)[:, 1]  # Probability of class '1' (like)
+        X_pred_svc = X_svc_scaled  # Using all menu items
+        preference_probs = svc.predict_proba(X_pred_svc)[:, 1]  # Probability of class '1' (like)
         menu_data['preference_score'] = preference_probs
     except NotFittedError as e:
         print(f"SVC model is not fitted: {e}")
-        return pd.DataFrame(), {'accuracy': accuracy, 'precision': precision, 'recall': recall, 'f1_score': f1}
+        return pd.DataFrame()
     except Exception as e:
         print(f"An error occurred during SVC prediction: {e}")
-        return pd.DataFrame(), {'accuracy': accuracy, 'precision': precision, 'recall': recall, 'f1_score': f1}
+        return pd.DataFrame()
 
-    # 4. Train SVR for Nutrient Matching
+    # 3. Train SVR for Nutrient Matching
     # Prepare nutrient features
     nutrient_features = [nutrient for nutrient in nutritional_weights.keys() if nutrient in menu_data.columns]
     if not nutrient_features:
         print("No nutrient features found for SVR.")
-        return pd.DataFrame(), {'accuracy': accuracy, 'precision': precision, 'recall': recall, 'f1_score': f1}
+        return pd.DataFrame()
 
     X_svr = menu_data[nutrient_features]
     y_svr = menu_data['nutrient_score']
@@ -441,41 +410,23 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     # Initialize and train the SVR model
     svr = SVR(kernel='rbf')
     try:
-        # Split the data into training and testing sets for evaluation
-        X_train_svr, X_test_svr, y_train_svr, y_test_svr = train_test_split(
-            X_svr_scaled, y_svr, test_size=0.2, random_state=42
-        )
-        svr.fit(X_train_svr, y_train_svr)
-
-        # Predict on the test set
-        y_pred_svr = svr.predict(X_test_svr)
-
-        # Optionally, you can compute regression metrics here
-        # For example:
-        from sklearn.metrics import mean_squared_error, r2_score
-        mse = mean_squared_error(y_test_svr, y_pred_svr)
-        r2 = r2_score(y_test_svr, y_pred_svr)
-
-        print(f"SVR Model Evaluation Metrics:")
-        print(f"Mean Squared Error: {mse:.4f}")
-        print(f"R^2 Score: {r2:.4f}")
-
+        svr.fit(X_svr_scaled, y_svr)
     except Exception as e:
         print(f"An error occurred while training SVR: {e}")
-        return pd.DataFrame(), {'accuracy': accuracy, 'precision': precision, 'recall': recall, 'f1_score': f1}
+        return pd.DataFrame()
 
-    # 5. Predict nutrient scores on all menu items
+    # Predict nutrient scores
     try:
         predicted_nutrient_scores = svr.predict(X_svr_scaled)
         menu_data['predicted_nutrient_score'] = predicted_nutrient_scores
     except NotFittedError as e:
         print(f"SVR model is not fitted: {e}")
-        return pd.DataFrame(), {'accuracy': accuracy, 'precision': precision, 'recall': recall, 'f1_score': f1}
+        return pd.DataFrame()
     except Exception as e:
         print(f"An error occurred during SVR prediction: {e}")
-        return pd.DataFrame(), {'accuracy': accuracy, 'precision': precision, 'recall': recall, 'f1_score': f1}
+        return pd.DataFrame()
 
-    # 6. Combine SVC and SVR Predictions into Composite Score
+    # 4. Combine SVC and SVR Predictions into Composite Score
     # Define weights for SVC and SVR
     svc_weight = 0.2  # 20% weight for preference
     svr_weight = 0.8  # 80% weight for nutrient matching
@@ -485,7 +436,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
         svr_weight * menu_data['predicted_nutrient_score']
     )
 
-    # 7. Generate Top N Recommendations
+    # 5. Generate Top N Recommendations
     top_recommended_dishes = menu_data.sort_values(by='composite_score', ascending=False).head(top_n)
 
     # Assign rankings
@@ -503,34 +454,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     top_dishes_with_scores['Rank'] = top_dishes_with_scores['Rank'].astype(int)
     top_dishes_with_scores['score'] = top_dishes_with_scores['score'].astype(float)
 
-    # 8. Calculate Recommendation Metrics
-    recommended_food_ids = set(top_dishes_with_scores['food_detail_id'])
-    expected_food_ids_set = set(expected_food_ids)
-
-    TP = len(recommended_food_ids & expected_food_ids_set)
-    FP = len(recommended_food_ids - expected_food_ids_set)
-    FN = len(expected_food_ids_set - recommended_food_ids)
-
-    precision_recommend = TP / (TP + FP) if (TP + FP) > 0 else 0
-    recall_recommend = TP / (TP + FN) if (TP + FN) > 0 else 0
-    f1_recommend = 2 * (precision_recommend * recall_recommend) / (precision_recommend + recall_recommend) if (precision_recommend + recall_recommend) > 0 else 0
-    accuracy_recommend = (TP) / (TP + FP + FN) if (TP + FP + FN) > 0 else 0  # Simplified accuracy
-
-    metrics = {
-        'accuracy': accuracy_recommend,
-        'precision': precision_recommend,
-        'recall': recall_recommend,
-        'f1_score': f1_recommend
-    }
-
-    print("\nRecommendation Evaluation Metrics:")
-    print(f"Accuracy: {metrics['accuracy']:.4f}")
-    print(f"Precision: {metrics['precision']:.4f}")
-    print(f"Recall: {metrics['recall']:.4f}")
-    print(f"F1 Score: {metrics['f1_score']:.4f}")
-
-    # 9. Push to the database (Assuming database credentials and connection handling are correctly set up)
-    # Note: Ensure that nutritional_weights and nutrient_column_mapping are defined in your scope
+    # Push to the database
     connection = None
     try:
         connection = pg8000.connect(
@@ -556,7 +480,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
                   f"rank: {rank_int} (type: {type(rank_int)}), score: {score_float} (type: {type(score_float)})")
 
             query = '''
-            INSERT INTO app_user.user_food_recommendations (user_id, food_detail_id, rank, score)
+            INSERT INTO app_user.user_food_recommendations (user_id, food_detail_id, rank)
             VALUES (%s, %s, %s, %s)
             ON CONFLICT (user_id, food_detail_id)
             DO UPDATE SET rank = EXCLUDED.rank, score = EXCLUDED.score;
@@ -573,9 +497,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
 
     print("\nTop Recommended Dishes with Scores:")
     print(top_dishes_with_scores)
-
-    return top_dishes_with_scores, metrics
-
+    return top_dishes_with_scores
 
 
 # API Endpoint
