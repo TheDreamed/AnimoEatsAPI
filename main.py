@@ -8,7 +8,11 @@ import numpy as np
 from sklearn.svm import SVR, SVC
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, mean_squared_error
 import aiohttp
+import joblib  # For model serialization
+
 # Load environment variables
 load_dotenv()
 
@@ -55,8 +59,9 @@ def fetch_data_user_data(user_id):
         # Fetch user allergies
         cursor.execute("""
             SELECT egg_free, gluten_free, dairy_free, fish_free, shellfish_free, peanut_free, treenut_free, soy_free, wheat_free
-            FROM app_user.user_allergies;
-        """)
+            FROM app_user.user_allergies
+            WHERE user_id = %s;
+        """, (user_id,))
         df_allergies = pd.DataFrame(cursor.fetchall(), columns=[
             'egg_free', 'gluten_free', 'dairy_free', 'fish_free', 'shellfish_free', 'peanut_free', 
             'treenut_free', 'soy_free', 'wheat_free'
@@ -65,8 +70,9 @@ def fetch_data_user_data(user_id):
         # Fetch user health profile
         cursor.execute("""
             SELECT user_id, carbohydrate, fat, protein, fiber, sodium, sugar, calories
-            FROM app_user.user_health_profile;
-        """)
+            FROM app_user.user_health_profile
+            WHERE user_id = %s;
+        """, (user_id,))
         df_health = pd.DataFrame(cursor.fetchall(), columns=[
             'user_id', 'carbohydrate', 'fat', 'protein', 'fiber', 'sodium', 'sugar', 'calories'
         ])
@@ -76,8 +82,9 @@ def fetch_data_user_data(user_id):
         # Fetch user category ratings
         cursor.execute("""
             SELECT "userId", "categoryId", rank
-            FROM app_user.user_category_rating;
-        """)
+            FROM app_user.user_category_rating
+            WHERE "userId" = %s;
+        """, (user_id,))
         df_category = pd.DataFrame(cursor.fetchall(), columns=['userId', 'categoryId', 'rank'])
         df_category['categoryName'] = df_category['categoryId'].map(category_mapping)
         df_category_pivot = df_category.pivot(index='userId', columns='categoryName', values='rank')
@@ -172,10 +179,11 @@ def fetch_and_transform_swipe_data(user_id):
         # SQL query to fetch data from app_user.food_swipe_history
         sql_query = '''
         SELECT "userId", "foodItemId", "categoryId", "preference"
-        FROM app_user.food_swipe_history;
+        FROM app_user.food_swipe_history
+        WHERE "userId" = %s;
         '''
 
-        cursor.execute(sql_query)
+        cursor.execute(sql_query, (user_id,))
         data = cursor.fetchall()
 
         # Fetch column names from the cursor description
@@ -192,11 +200,11 @@ def fetch_and_transform_swipe_data(user_id):
         }, inplace=True)
 
         # Map categoryId to category names if category_mapping is provided
-        if "category_mapping" in globals() and callable(category_mapping):
-            df["categoryId"] = df["categoryId"].map(category_mapping)
+        if "category_mapping" in globals():
+            df["categoryName"] = df["categoryId"].map(category_mapping)
         else:
             # If no mapping is provided, you can choose to keep the ID or handle accordingly
-            pass
+            df["categoryName"] = df["categoryId"]
 
         # Map 'like' to 1 and 'dislike' to 0
         df["preference"] = df["preference"].map({
@@ -212,8 +220,8 @@ def fetch_and_transform_swipe_data(user_id):
 
         # Group by user_id and collect foodItemId, categoryId, and preference
         expected_recommendations = {}
-        for user_id, group in df.groupby("user_id"):
-            expected_recommendations[user_id] = {
+        for uid, group in df.groupby("user_id"):
+            expected_recommendations[uid] = {
                 "foodItemId": group["foodItemId"].tolist(),
                 "categoryId": group["categoryId"].tolist(),
                 "preference": group["preference"].tolist()
@@ -221,11 +229,11 @@ def fetch_and_transform_swipe_data(user_id):
         print(expected_recommendations)
         # Return the recommendations dictionary
         return expected_recommendations
-        
+
     except Exception as e:
         print(f"An error occurred: {e}")
         return {}
-    
+
     finally:
         if connection:
             connection.close()
@@ -239,8 +247,6 @@ class RecommendationResponse(BaseModel):
     message: str
     data: list
 
-
-# Recommendation logic (simplified for API use)
 # Define specific weights for nutritional features
 nutritional_weights = {
     'calories': 0.5,      # 50% of 80% weight
@@ -249,7 +255,7 @@ nutritional_weights = {
     'fat': 0.1,           # 10% of 80% weight
     'fiber': 0.05,        # 5% of 80% weight
     'sugar': 0.05,        # 5% of 80% weight
-    'sodium': 0.0         # 0% weight for sodium (not considered for recommendation)
+    'sodium': 0.0         # 0% weight for sodium
 }
 
 # Define weights
@@ -427,8 +433,8 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
 
     # Combine SVC and SVR predictions
     # Define how much weight each model contributes to the final score
-    final_composite_weight = 0.2  # Weight for SVC preference score
-    nutrient_composite_weight = 0.8  # Weight for SVR nutrient score
+    final_composite_weight = 0.5  # Weight for SVC preference score
+    nutrient_composite_weight = 0.5  # Weight for SVR nutrient score
 
     menu_data['composite_score'] = (
         final_composite_weight * menu_data['preference_score'] +
@@ -501,7 +507,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
 @app.post("/recommendations", response_model=RecommendationResponse)
 async def get_recommendations(request: RecommendationRequest):
     """
-    Endpoint to get food recommendations for the latest user.
+    Endpoint to get food recommendations for a user.
     """
     try:
         user_id = request.user_id  # Assign user_id from request first
