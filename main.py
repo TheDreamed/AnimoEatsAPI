@@ -294,7 +294,7 @@ def recommend_food_for_user(
     """
     Generates top N food recommendations for the specified user based on their preferences and nutritional needs,
     giving 80% importance to nutritional needs and 20% to category preferences.
-
+    
     Parameters:
     - combined_df (pd.DataFrame): DataFrame containing user information, category preferences, and nutritional needs.
     - df_food_details (pd.DataFrame): DataFrame containing food item details and nutritional information.
@@ -307,7 +307,7 @@ def recommend_food_for_user(
     - maximize_nutrients (set): Set of nutrient names that should be maximized.
     - nutrition_weight (float): Weight assigned to the nutrition score.
     - category_weight_percent (float): Weight assigned to the category preference score.
-
+    
     Returns:
     - pd.DataFrame: DataFrame containing the top recommended dishes with rankings and scores.
     """
@@ -386,11 +386,11 @@ def recommend_food_for_user(
         match_feature = f'match_{nutrient}'
         menu_data['nutrient_score'] += menu_data[match_feature] * weight
 
-    # Define composite score
-    menu_data['composite_score'] = (
-        nutrition_weight * menu_data['nutrient_score'] +
-        category_weight_percent * menu_data['preference_score']
-    )
+    # Define composite score (will be redefined after combining SVC and SVR outputs)
+    # menu_data['composite_score'] = (
+    #     nutrition_weight * menu_data['nutrient_score'] +
+    #     category_weight_percent * menu_data['preference_score']
+    # )
 
     # Feature Engineering: Include category preferences
     category_features = [col for col in menu_data.columns if col.startswith("category") and col != 'categoryId']
@@ -431,33 +431,70 @@ def recommend_food_for_user(
     scaling_features = category_features + match_features
     menu_data[scaling_features] = scaler.fit_transform(menu_data[scaling_features])
 
-    # Prepare training data
-    X = menu_data[scaling_features]
-    y = menu_data['composite_score']
+    # -----------------------------
+    # New Implementation Starts Here
+    # -----------------------------
 
-    # Initialize and train the Regression model
+    # 3. Model Training and Prediction
+
+    # a. Prepare data for SVC (Category Preferences)
+    # Assuming 'preference_score' is the target for SVC (0 or 1)
+    X_category = menu_data[category_features]
+    y_category = menu_data['preference_score']
+
+    # Initialize and train the SVC model
+    svc = SVC(kernel='rbf', probability=True)
+    svc.fit(X_category, y_category)
+
+    # Predict category preference probabilities
+    # Probability of liking the category
+    menu_data['category_score'] = svc.predict_proba(X_category)[:, 1]  # Probability of class 1
+
+    # b. Prepare data for SVR (Nutrient Scores)
+    X_nutrient = menu_data[match_features]
+    y_nutrient = menu_data['nutrient_score']
+
+    # Initialize and train the SVR model
     svr = SVR(kernel='rbf')
-    svr.fit(X, y)
+    svr.fit(X_nutrient, y_nutrient)
 
-    # Predict composite scores
-    menu_data['predicted_score'] = svr.predict(X)
+    # Predict nutrient scores
+    menu_data['predicted_nutrient_score'] = svr.predict(X_nutrient)
 
-    # Sort based on predicted scores
-    top_recommended_dishes = menu_data.sort_values(by='predicted_score', ascending=False).head(top_n)
+    # -----------------------------
+    # Combine SVC and SVR Outputs
+    # -----------------------------
+
+    # Define composite score by combining category and nutrient scores
+    menu_data['composite_score'] = (
+        nutrition_weight * menu_data['predicted_nutrient_score'] +
+        category_weight_percent * menu_data['category_score']
+    )
+
+    # -----------------------------
+    # Recommendation Generation
+    # -----------------------------
+
+    # Sort based on composite scores
+    top_recommended_dishes = menu_data.sort_values(by='composite_score', ascending=False).head(top_n)
 
     # Assign rankings
     top_recommended_dishes = top_recommended_dishes.copy()
     top_recommended_dishes['Rank'] = range(1, top_n + 1)
 
     # Prepare the final DataFrame for recommendations
-    top_dishes_with_scores = top_recommended_dishes[['Rank', 'foodItemId', 'predicted_score']].copy()
-    top_dishes_with_scores.rename(columns={'foodItemId': 'food_detail_id', 'predicted_score': 'score'}, inplace=True)
+    top_dishes_with_scores = top_recommended_dishes[['Rank', 'foodItemId', 'composite_score']].copy()
+    top_dishes_with_scores.rename(columns={'foodItemId': 'food_detail_id', 'composite_score': 'score'}, inplace=True)
     top_dishes_with_scores['user_id'] = user_id
 
     # Ensure correct data types
     top_dishes_with_scores['user_id'] = top_dishes_with_scores['user_id'].astype(int)
     top_dishes_with_scores['food_detail_id'] = top_dishes_with_scores['food_detail_id'].astype(int)
     top_dishes_with_scores['Rank'] = top_dishes_with_scores['Rank'].astype(int)
+
+    # -----------------------------
+    # Database Insertion
+    # -----------------------------
 
     # Push to the database
     connection = None
@@ -500,7 +537,6 @@ def recommend_food_for_user(
     print("\nTop Recommended Dishes with Scores:")
     print(top_dishes_with_scores)
     return top_dishes_with_scores
-
 
 # API Endpoint
 @app.post("/recommendations", response_model=RecommendationResponse)
