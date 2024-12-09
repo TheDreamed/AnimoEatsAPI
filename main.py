@@ -275,8 +275,6 @@ def recommend_food_for_user(
     top_n=20,
     nutrient_column_mapping=None,
     nutritional_weights=None,
-    minimize_nutrients=None,
-    maximize_nutrients=None,
     nutrition_weight=0.8,
     category_weight_percent=0.2
 ):
@@ -303,7 +301,7 @@ def recommend_food_for_user(
     print(f"Generating recommendations for User ID: {user_id}")
 
     # Validate that all necessary mappings are provided
-    if not all([nutrient_column_mapping, nutritional_weights, minimize_nutrients, maximize_nutrients]):
+    if not all([nutrient_column_mapping, nutritional_weights]):
         print("Error: Missing necessary nutrient mappings or weights.")
         return pd.DataFrame()
 
