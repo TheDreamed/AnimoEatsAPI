@@ -281,7 +281,7 @@ nutrient_column_mapping = {
 def recommend_food_for_user(combined_df, df_food_details, expected_recommendation, user_id, top_n=20):
     """
     Generates top N food recommendations for the specified user based on their preferences and nutritional needs,
-    giving 80% importance to nutritional needs and 20% to category preferences.
+    using SVC for categorical preferences and SVR for nutritional matching, then combining them.
 
     Parameters:
     - combined_df (pd.DataFrame): DataFrame containing user information, category preferences, and nutritional needs.
@@ -313,11 +313,35 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     food_preference_map = dict(zip(expected_food_ids, preferences))
     menu_data['preference'] = menu_data['foodItemId'].map(food_preference_map).fillna(0).astype(int)
 
-    # 1. Calculate Preference Score
-    menu_data['preference_score'] = menu_data['preference']  # 1 for like, 0 for dislike
+    # 1. Calculate Preference Score using SVC
+    # Prepare category features
+    category_features = [col for col in combined_df.columns if col.startswith("category")]
 
-    # 2. Calculate Nutrient Match Score
-    # Normalize nutritional features based on user needs
+    X_svc = combined_df[category_features]
+    y_svc = menu_data['preference']
+
+    # Handle missing values
+    imputer = SimpleImputer(strategy='mean')
+    X_svc_imputed = imputer.fit_transform(X_svc)
+
+    # Feature Scaling
+    scaler_svc = StandardScaler()
+    X_svc_scaled = scaler_svc.fit_transform(X_svc_imputed)
+
+    # Initialize and train the Classification model
+    svc = SVC(kernel='rbf', probability=True)
+    svc.fit(X_svc_scaled, y_svc)
+
+    # Prepare features for prediction
+    X_pred_svc = menu_data[category_features]
+    X_pred_svc_imputed = imputer.transform(X_pred_svc)
+    X_pred_svc_scaled = scaler_svc.transform(X_pred_svc_imputed)
+
+    # Predict preference scores
+    menu_data['preference_score'] = svc.predict_proba(X_pred_svc_scaled)[:, 1]  # Probability of class '1'
+
+    # 2. Calculate Nutrient Match Score using SVR
+    # Extract user nutritional needs
     user_nutritional_needs = {}
     missing_nutrients = []
     for nutrient, column_name in nutrient_column_mapping.items():
@@ -350,12 +374,6 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     for nutrient, weight in nutritional_weights.items():
         match_feature = f'match_{nutrient}'
         menu_data['nutrient_score'] += menu_data[match_feature] * weight
-
-    # Define composite score
-    menu_data['composite_score'] = (
-        nutrition_weight * menu_data['nutrient_score'] +
-        category_weight_percent * menu_data['preference_score']
-    )
 
     # Feature Engineering: Include category preferences
     category_features = [col for col in menu_data.columns if col.startswith("category") and col != 'categoryId']
@@ -391,32 +409,42 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
         print("No missing values found in numeric features.")
 
     # Feature Scaling
-    scaler = StandardScaler()
+    scaler_svr = StandardScaler()
     # Select features for scaling: category features and match features
     scaling_features = category_features + match_features
-    menu_data[scaling_features] = scaler.fit_transform(menu_data[scaling_features])
+    menu_data[scaling_features] = scaler_svr.fit_transform(menu_data[scaling_features])
 
-    # Prepare training data
-    X = menu_data[scaling_features]
-    y = menu_data['composite_score']
+    # Prepare training data for SVR
+    X_svr = menu_data[scaling_features]
+    y_svr = menu_data['nutrient_score']
 
     # Initialize and train the Regression model
     svr = SVR(kernel='rbf')
-    svr.fit(X, y)
+    svr.fit(X_svr, y_svr)
 
-    # Predict composite scores
-    menu_data['predicted_score'] = svr.predict(X)
+    # Predict nutrient scores
+    menu_data['predicted_nutrient_score'] = svr.predict(X_svr)
 
-    # Sort based on predicted scores
-    top_recommended_dishes = menu_data.sort_values(by='predicted_score', ascending=False).head(top_n)
+    # Combine SVC and SVR predictions
+    # Define how much weight each model contributes to the final score
+    final_composite_weight = 0.2  # Weight for SVC preference score
+    nutrient_composite_weight = 0.8  # Weight for SVR nutrient score
+
+    menu_data['composite_score'] = (
+        final_composite_weight * menu_data['preference_score'] +
+        nutrient_composite_weight * menu_data['predicted_nutrient_score']
+    )
+
+    # Sort based on composite scores
+    top_recommended_dishes = menu_data.sort_values(by='composite_score', ascending=False).head(top_n)
 
     # Assign rankings
     top_recommended_dishes = top_recommended_dishes.copy()
     top_recommended_dishes['Rank'] = range(1, top_n + 1)
 
     # Prepare the final DataFrame for recommendations
-    top_dishes_with_scores = top_recommended_dishes[['Rank', 'foodItemId', 'predicted_score']].copy()
-    top_dishes_with_scores.rename(columns={'foodItemId': 'food_detail_id', 'predicted_score': 'score'}, inplace=True)
+    top_dishes_with_scores = top_recommended_dishes[['Rank', 'foodItemId', 'composite_score']].copy()
+    top_dishes_with_scores.rename(columns={'foodItemId': 'food_detail_id', 'composite_score': 'score'}, inplace=True)
     top_dishes_with_scores['user_id'] = user_id
 
     # Ensure correct data types
@@ -451,6 +479,8 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
             query = '''
             INSERT INTO app_user.user_food_recommendations (user_id, food_detail_id, rank)
             VALUES (%s, %s, %s)
+            ON CONFLICT (user_id, food_detail_id) 
+            DO UPDATE SET rank = EXCLUDED.rank;
             '''
             cursor.execute(query, (user_id_int, food_detail_id_int, rank_int))
 
