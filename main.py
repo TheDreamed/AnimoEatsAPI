@@ -6,10 +6,11 @@ import os
 from dotenv import load_dotenv
 import numpy as np
 from sklearn.svm import SVR, SVC
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.impute import SimpleImputer
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.metrics import accuracy_score, mean_squared_error
+from sklearn.exceptions import NotFittedError
 import aiohttp
 import joblib  # For model serialization
 
