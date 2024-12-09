@@ -240,6 +240,18 @@ class RecommendationResponse(BaseModel):
     data: list
 
 
+# Recommendation logic (simplified for API use)
+# Define specific weights for nutritional features
+nutritional_weights = {
+    'calories': 0.5,      # 50% of 80% weight
+    'protein': 0.2,       # 20% of 80% weight
+    'carbohydrates': 0.1, # 10% of 80% weight
+    'fat': 0.1,           # 10% of 80% weight
+    'fiber': 0.05,        # 5% of 80% weight
+    'sugar': 0.05,        # 5% of 80% weight
+    'sodium': 0.0         # 0% weight for sodium (not considered for recommendation)
+}
+
 # Define weights
 nutrition_weight = 0.8
 category_weight_percent = 0.2
@@ -266,19 +278,7 @@ nutrient_column_mapping = {
     'sodium': 'sodium'
 }
 
-def recommend_food_for_user(
-    combined_df, 
-    df_food_details, 
-    expected_recommendation, 
-    user_id, 
-    top_n=20,
-    nutrient_column_mapping=None,
-    nutritional_weights=None,
-    minimize_nutrients=None,
-    maximize_nutrients=None,
-    nutrition_weight=0.8,
-    category_weight_percent=0.2
-):
+def recommend_food_for_user(combined_df, df_food_details, expected_recommendation, user_id, top_n=20):
     """
     Generates top N food recommendations for the specified user based on their preferences and nutritional needs,
     giving 80% importance to nutritional needs and 20% to category preferences.
@@ -289,12 +289,6 @@ def recommend_food_for_user(
     - expected_recommendation (dict): Dictionary mapping user_id to expected foodItemId, categoryId, and preference.
     - user_id (int): The ID of the user for whom to generate recommendations.
     - top_n (int): Number of top recommendations to generate.
-    - nutrient_column_mapping (dict): Mapping of nutrient names to their corresponding column names in combined_df.
-    - nutritional_weights (dict): Weights assigned to each nutrient.
-    - minimize_nutrients (set): Set of nutrient names that should be minimized.
-    - maximize_nutrients (set): Set of nutrient names that should be maximized.
-    - nutrition_weight (float): Weight assigned to the nutrition score.
-    - category_weight_percent (float): Weight assigned to the category preference score.
 
     Returns:
     - pd.DataFrame: DataFrame containing the top recommended dishes with rankings and scores.
@@ -339,28 +333,16 @@ def recommend_food_for_user(
 
     # Calculate nutrient match ratios, capped at 1.0
     for nutrient in nutritional_weights.keys():
-        match_feature = f'match_{nutrient}'
-        if nutrient in maximize_nutrients:
-            if nutrient in user_nutritional_needs:
-                target = user_nutritional_needs[nutrient]
-                menu_data[match_feature] = menu_data.apply(
-                    lambda row: min(row.get(nutrient, 0) / target, 1.0) if row.get(nutrient, 0) > 0 else 0.0,
-                    axis=1
-                )
-            else:
-                menu_data[match_feature] = 0.0
-        elif nutrient in minimize_nutrients:
-            if nutrient in user_nutritional_needs:
-                target = user_nutritional_needs[nutrient]
-                # Avoid division by zero by setting a minimum value
-                menu_data[match_feature] = menu_data.apply(
-                    lambda row: min(target / row.get(nutrient, 1), 1.0) if row.get(nutrient, 0) > 0 else 0.0,
-                    axis=1
-                )
-            else:
-                menu_data[match_feature] = 0.0
+        if nutrient in user_nutritional_needs:
+            target = user_nutritional_needs[nutrient]
+            match_feature = f'match_{nutrient}'
+            menu_data[match_feature] = menu_data.apply(
+                lambda row: min(row.get(nutrient, 0) / target, 1.0) if row.get(nutrient, 0) > 0 else 0.0,
+                axis=1
+            )
         else:
-            # If nutrient is neither to maximize nor minimize, set match to 0
+            # If the nutrient is not considered, set match to 0
+            match_feature = f'match_{nutrient}'
             menu_data[match_feature] = 0.0
 
     # Weighted nutrient match score
