@@ -240,17 +240,6 @@ class RecommendationResponse(BaseModel):
     data: list
 
 
-# Recommendation logic (simplified for API use)
-# Define specific weights for nutritional features
-nutritional_weights = {
-    'calories': 0.5,      # 50% of 80% weight
-    'protein': 0.2,       # 20% of 80% weight
-    'carbohydrates': 0.1, # 10% of 80% weight
-    'fat': 0.1,           # 10% of 80% weight
-    'fiber': 0.05,        # 5% of 80% weight
-    'sugar': 0.05,        # 5% of 80% weight
-    'sodium': 0.0         # 0% weight for sodium (not considered for recommendation)
-}
 
 # Define weights
 nutrition_weight = 0.8
