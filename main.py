@@ -264,13 +264,13 @@ category_weight_percent = 0.2
 
 # Define specific weights for nutritional features
 nutritional_weights = {
-    'calories': 0.5,      # 50% of 80% weight
-    'protein': 0.2,       # 20% of 80% weight
-    'carbohydrates': 0.1, # 10% of 80% weight
-    'fat': 0.1,           # 10% of 80% weight
-    'fiber': 0.05,        # 5% of 80% weight
-    'sugar': 0.05,        # 5% of 80% weight
-    'sodium': 0.0         # 0% weight for sodium
+    'calories': -0.5,      # Negative weight for detrimental nutrient
+    'protein': 0.2,        # Positive weight for beneficial nutrient
+    'carbohydrates': 0.1,  # Depending on user needs, can be positive or negative
+    'fat': -0.3,            # Negative weight for detrimental nutrient
+    'fiber': 0.2,          # Positive weight for beneficial nutrient
+    'sugar': -0.4,         # Negative weight for detrimental nutrient
+    'sodium': -0.3         # Negative weight for detrimental nutrient
 }
 
 # Define a mapping from standardized nutrient names to combined_df column names
@@ -324,7 +324,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
         print("Not enough preference data to train SVC.")
         return pd.DataFrame()
 
-    # 1. Calculate Nutrient Match Score (Manual Calculation)
+    # 1. Calculate Nutrient Match Score (Adjusted for Beneficial and Detrimental Nutrients)
     user_nutritional_needs = {}
     missing_nutrients = []
     for nutrient, column_name in nutrient_column_mapping.items():
@@ -338,18 +338,32 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
         print(f"Missing or invalid nutritional needs for User ID {user_id}: {missing_nutrients}")
         return pd.DataFrame()  # Return empty DataFrame
 
-    # Calculate nutrient match ratios, capped at 1.0
+    # Calculate nutrient match ratios, handling beneficial and detrimental nutrients
     for nutrient in nutritional_weights.keys():
-        if nutrient in user_nutritional_needs:
-            target = user_nutritional_needs[nutrient]
+        target = user_nutritional_needs.get(nutrient, None)
+        if target is None:
+            # If the nutrient is not considered, set match to 0
             match_feature = f'match_{nutrient}'
+            menu_data[match_feature] = 0.0
+            continue
+
+        match_feature = f'match_{nutrient}'
+        if nutrient in beneficial_nutrients:
+            # Higher is better
             menu_data[match_feature] = menu_data.apply(
                 lambda row: min(row.get(nutrient, 0) / target, 1.0) if row.get(nutrient, 0) > 0 else 0.0,
                 axis=1
             )
+        elif nutrient in detrimental_nutrients:
+            # Lower is better
+            # To avoid division by zero, add a small epsilon
+            epsilon = 1e-5
+            menu_data[match_feature] = menu_data.apply(
+                lambda row: min(target / (row.get(nutrient, epsilon) + epsilon), 1.0) if row.get(nutrient, 0) > 0 else 0.0,
+                axis=1
+            )
         else:
-            # If the nutrient is not considered, set match to 0
-            match_feature = f'match_{nutrient}'
+            # For any other nutrients, set match to 0
             menu_data[match_feature] = 0.0
 
     # Weighted nutrient match score
@@ -400,7 +414,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
 
     # 3. Train SVR for Nutrient Matching
     # Prepare nutrient features
-    nutrient_features = [nutrient for nutrient in nutritional_weights.keys() if nutrient in menu_data.columns]
+    nutrient_features = [f'match_{nutrient}' for nutrient in nutritional_weights.keys()]
     if not nutrient_features:
         print("No nutrient features found for SVR.")
         return pd.DataFrame()
