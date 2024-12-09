@@ -8,8 +8,9 @@ import numpy as np
 from sklearn.svm import SVR, SVC
 from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
+from sklearn.exceptions import NotFittedError
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, mean_squared_error
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, mean_squared_error, r2_score
 import aiohttp
 import joblib  # For model serialization
 
@@ -279,6 +280,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     """
     Generates top N food recommendations for the specified user based on their preferences and nutritional needs,
     using SVC for categorical preferences and SVR for nutritional matching, then combining them.
+    Also prints evaluation metrics for both models.
 
     Parameters:
     - combined_df (pd.DataFrame): DataFrame containing user information, category preferences, and nutritional needs.
@@ -361,26 +363,59 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     X_svc = menu_data[category_features]
     y_svc = menu_data['preference']
 
+    # Split data into training and testing sets for SVC
+    X_train_svc, X_test_svc, y_train_svc, y_test_svc = train_test_split(
+        X_svc, y_svc, test_size=0.2, random_state=42, stratify=y_svc
+    )
+
     # Impute missing values
     imputer_svc = SimpleImputer(strategy='mean')
-    X_svc_imputed = imputer_svc.fit_transform(X_svc)
+    X_train_svc_imputed = imputer_svc.fit_transform(X_train_svc)
+    X_test_svc_imputed = imputer_svc.transform(X_test_svc)
 
     # Feature Scaling
     scaler_svc = StandardScaler()
-    X_svc_scaled = scaler_svc.fit_transform(X_svc_imputed)
+    X_train_svc_scaled = scaler_svc.fit_transform(X_train_svc_imputed)
+    X_test_svc_scaled = scaler_svc.transform(X_test_svc_imputed)
 
     # Initialize and train the SVC model
-    svc = SVC(kernel='rbf', probability=True)
+    svc = SVC(kernel='rbf', probability=True, random_state=42)
     try:
-        svc.fit(X_svc_scaled, y_svc)
+        svc.fit(X_train_svc_scaled, y_train_svc)
     except Exception as e:
         print(f"An error occurred while training SVC: {e}")
         return pd.DataFrame()
 
-    # Predict preference probabilities
+    # Predict on the test set and calculate evaluation metrics for SVC
     try:
-        X_pred_svc = X_svc_scaled  # Using all menu items
-        preference_probs = svc.predict_proba(X_pred_svc)[:, 1]  # Probability of class '1' (like)
+        y_pred_svc = svc.predict(X_test_svc_scaled)
+        accuracy = accuracy_score(y_test_svc, y_pred_svc)
+        precision = precision_score(y_test_svc, y_pred_svc, zero_division=0)
+        recall = recall_score(y_test_svc, y_pred_svc, zero_division=0)
+        f1 = f1_score(y_test_svc, y_pred_svc, zero_division=0)
+
+        print("\nSVC Evaluation Metrics:")
+        print(f"Accuracy: {accuracy:.4f}")
+        print(f"Precision: {precision:.4f}")
+        print(f"Recall: {recall:.4f}")
+        print(f"F1 Score: {f1:.4f}")
+    except Exception as e:
+        print(f"An error occurred during SVC evaluation: {e}")
+        return pd.DataFrame()
+
+    # Retrain SVC on the entire dataset
+    try:
+        X_svc_imputed_full = imputer_svc.fit_transform(X_svc)
+        X_svc_scaled_full = scaler_svc.fit_transform(X_svc_imputed_full)
+        svc.fit(X_svc_scaled_full, y_svc)
+    except Exception as e:
+        print(f"An error occurred while retraining SVC on full data: {e}")
+        return pd.DataFrame()
+
+    # Predict preference probabilities on all menu items
+    try:
+        X_pred_svc_full = X_svc_scaled_full  # Using all menu items
+        preference_probs = svc.predict_proba(X_pred_svc_full)[:, 1]  # Probability of class '1' (like)
         menu_data['preference_score'] = preference_probs
     except NotFittedError as e:
         print(f"SVC model is not fitted: {e}")
@@ -399,25 +434,54 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     X_svr = menu_data[nutrient_features]
     y_svr = menu_data['nutrient_score']
 
+    # Split data into training and testing sets for SVR
+    X_train_svr, X_test_svr, y_train_svr, y_test_svr = train_test_split(
+        X_svr, y_svr, test_size=0.2, random_state=42
+    )
+
     # Impute missing values
     imputer_svr = SimpleImputer(strategy='mean')
-    X_svr_imputed = imputer_svr.fit_transform(X_svr)
+    X_train_svr_imputed = imputer_svr.fit_transform(X_train_svr)
+    X_test_svr_imputed = imputer_svr.transform(X_test_svr)
 
     # Feature Scaling
     scaler_svr = StandardScaler()
-    X_svr_scaled = scaler_svr.fit_transform(X_svr_imputed)
+    X_train_svr_scaled = scaler_svr.fit_transform(X_train_svr_imputed)
+    X_test_svr_scaled = scaler_svr.transform(X_test_svr_imputed)
 
     # Initialize and train the SVR model
     svr = SVR(kernel='rbf')
     try:
-        svr.fit(X_svr_scaled, y_svr)
+        svr.fit(X_train_svr_scaled, y_train_svr)
     except Exception as e:
         print(f"An error occurred while training SVR: {e}")
         return pd.DataFrame()
 
-    # Predict nutrient scores
+    # Predict on the test set and calculate evaluation metrics for SVR
     try:
-        predicted_nutrient_scores = svr.predict(X_svr_scaled)
+        y_pred_svr = svr.predict(X_test_svr_scaled)
+        mse = mean_squared_error(y_test_svr, y_pred_svr)
+        r2 = r2_score(y_test_svr, y_pred_svr)
+
+        print("\nSVR Evaluation Metrics:")
+        print(f"Mean Squared Error (MSE): {mse:.4f}")
+        print(f"R-squared (R²): {r2:.4f}")
+    except Exception as e:
+        print(f"An error occurred during SVR evaluation: {e}")
+        return pd.DataFrame()
+
+    # Retrain SVR on the entire dataset
+    try:
+        X_svr_imputed_full = imputer_svr.fit_transform(X_svr)
+        X_svr_scaled_full = scaler_svr.fit_transform(X_svr_imputed_full)
+        svr.fit(X_svr_scaled_full, y_svr)
+    except Exception as e:
+        print(f"An error occurred while retraining SVR on full data: {e}")
+        return pd.DataFrame()
+
+    # Predict nutrient scores on all menu items
+    try:
+        predicted_nutrient_scores = svr.predict(X_svr_scaled_full)
         menu_data['predicted_nutrient_score'] = predicted_nutrient_scores
     except NotFittedError as e:
         print(f"SVR model is not fitted: {e}")
@@ -480,7 +544,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
                   f"rank: {rank_int} (type: {type(rank_int)}), score: {score_float} (type: {type(score_float)})")
 
             query = '''
-            INSERT INTO app_user.user_food_recommendations (user_id, food_detail_id, rank)
+            INSERT INTO app_user.user_food_recommendations (user_id, food_detail_id, rank, score)
             VALUES (%s, %s, %s, %s)
             ON CONFLICT (user_id, food_detail_id)
             DO UPDATE SET rank = EXCLUDED.rank, score = EXCLUDED.score;
@@ -498,7 +562,6 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     print("\nTop Recommended Dishes with Scores:")
     print(top_dishes_with_scores)
     return top_dishes_with_scores
-
 
 # API Endpoint
 @app.post("/recommendations", response_model=RecommendationResponse)
