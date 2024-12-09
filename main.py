@@ -248,6 +248,8 @@ class RecommendationResponse(BaseModel):
     message: str
     data: list
 
+
+
 # Define specific weights for nutritional features
 nutritional_weights = {
     'calories': 0.5,      # 50% of 80% weight
@@ -452,11 +454,12 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
         print(f"An error occurred during SVR prediction: {e}")
         return pd.DataFrame()
 
-    # 4. Combine SVC and SVR Predictions into Composite Score
-    # Normalize both scores to [0,1]
-    menu_data['preference_score_normalized'] = scaler_pref.transform(menu_data[['preference_score']])
-    menu_data['predicted_nutrient_score_normalized'] = scaler_nutrient.transform(menu_data[['predicted_nutrient_score']])
+    # **Fix Applied Here: Remove scaling of 'predicted_nutrient_score'**
+    # menu_data['predicted_nutrient_score_normalized'] = scaler_nutrient.transform(menu_data[['predicted_nutrient_score']])
+    # Instead, assign the clipped predicted scores directly
+    menu_data['predicted_nutrient_score_normalized'] = menu_data['predicted_nutrient_score']
 
+    # 4. Combine SVC and SVR Predictions into Composite Score
     # Define weights for SVC and SVR
     svc_weight = 0.3  # 30% weight for preference
     svr_weight = 0.7  # 70% weight for nutrient matching
@@ -528,6 +531,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     print("\nTop Recommended Dishes with Scores:")
     print(top_dishes_with_scores)
     return top_dishes_with_scores
+
 
 # API Endpoint
 @app.post("/recommendations", response_model=RecommendationResponse)
