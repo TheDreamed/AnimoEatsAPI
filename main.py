@@ -240,18 +240,6 @@ class RecommendationResponse(BaseModel):
     data: list
 
 
-# Recommendation logic (simplified for API use)
-# Define specific weights for nutritional features
-nutritional_weights = {
-    'calories': 0.5,      # 50% of 80% weight
-    'protein': 0.2,       # 20% of 80% weight
-    'carbohydrates': 0.1, # 10% of 80% weight
-    'fat': 0.1,           # 10% of 80% weight
-    'fiber': 0.05,        # 5% of 80% weight
-    'sugar': 0.05,        # 5% of 80% weight
-    'sodium': 0.0         # 0% weight for sodium (not considered for recommendation)
-}
-
 # Define weights
 nutrition_weight = 0.8
 category_weight_percent = 0.2
@@ -312,11 +300,6 @@ def recommend_food_for_user(
     - pd.DataFrame: DataFrame containing the top recommended dishes with rankings and scores.
     """
     print(f"Generating recommendations for User ID: {user_id}")
-
-    # Validate that all necessary mappings are provided
-    if not all([nutrient_column_mapping, nutritional_weights, minimize_nutrients, maximize_nutrients]):
-        print("Error: Missing necessary nutrient mappings or weights.")
-        return pd.DataFrame()
 
     # Extract user data
     user_data = combined_df[combined_df['user_id'] == user_id]
