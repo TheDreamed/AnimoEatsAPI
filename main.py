@@ -278,7 +278,19 @@ nutrient_column_mapping = {
     'sodium': 'sodium'
 }
 
-def recommend_food_for_user(combined_df, df_food_details, expected_recommendation, user_id, top_n=20):
+def recommend_food_for_user(
+    combined_df, 
+    df_food_details, 
+    expected_recommendation, 
+    user_id, 
+    top_n=20,
+    nutrient_column_mapping=None,
+    nutritional_weights=None,
+    minimize_nutrients=None,
+    maximize_nutrients=None,
+    nutrition_weight=0.8,
+    category_weight_percent=0.2
+):
     """
     Generates top N food recommendations for the specified user based on their preferences and nutritional needs,
     giving 80% importance to nutritional needs and 20% to category preferences.
@@ -289,11 +301,22 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     - expected_recommendation (dict): Dictionary mapping user_id to expected foodItemId, categoryId, and preference.
     - user_id (int): The ID of the user for whom to generate recommendations.
     - top_n (int): Number of top recommendations to generate.
+    - nutrient_column_mapping (dict): Mapping of nutrient names to their corresponding column names in combined_df.
+    - nutritional_weights (dict): Weights assigned to each nutrient.
+    - minimize_nutrients (set): Set of nutrient names that should be minimized.
+    - maximize_nutrients (set): Set of nutrient names that should be maximized.
+    - nutrition_weight (float): Weight assigned to the nutrition score.
+    - category_weight_percent (float): Weight assigned to the category preference score.
 
     Returns:
     - pd.DataFrame: DataFrame containing the top recommended dishes with rankings and scores.
     """
     print(f"Generating recommendations for User ID: {user_id}")
+
+    # Validate that all necessary mappings are provided
+    if not all([nutrient_column_mapping, nutritional_weights, minimize_nutrients, maximize_nutrients]):
+        print("Error: Missing necessary nutrient mappings or weights.")
+        return pd.DataFrame()
 
     # Extract user data
     user_data = combined_df[combined_df['user_id'] == user_id]
@@ -333,16 +356,28 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
 
     # Calculate nutrient match ratios, capped at 1.0
     for nutrient in nutritional_weights.keys():
-        if nutrient in user_nutritional_needs:
-            target = user_nutritional_needs[nutrient]
-            match_feature = f'match_{nutrient}'
-            menu_data[match_feature] = menu_data.apply(
-                lambda row: min(row.get(nutrient, 0) / target, 1.0) if row.get(nutrient, 0) > 0 else 0.0,
-                axis=1
-            )
+        match_feature = f'match_{nutrient}'
+        if nutrient in maximize_nutrients:
+            if nutrient in user_nutritional_needs:
+                target = user_nutritional_needs[nutrient]
+                menu_data[match_feature] = menu_data.apply(
+                    lambda row: min(row.get(nutrient, 0) / target, 1.0) if row.get(nutrient, 0) > 0 else 0.0,
+                    axis=1
+                )
+            else:
+                menu_data[match_feature] = 0.0
+        elif nutrient in minimize_nutrients:
+            if nutrient in user_nutritional_needs:
+                target = user_nutritional_needs[nutrient]
+                # Avoid division by zero by setting a minimum value
+                menu_data[match_feature] = menu_data.apply(
+                    lambda row: min(target / row.get(nutrient, 1), 1.0) if row.get(nutrient, 0) > 0 else 0.0,
+                    axis=1
+                )
+            else:
+                menu_data[match_feature] = 0.0
         else:
-            # If the nutrient is not considered, set match to 0
-            match_feature = f'match_{nutrient}'
+            # If nutrient is neither to maximize nor minimize, set match to 0
             menu_data[match_feature] = 0.0
 
     # Weighted nutrient match score
