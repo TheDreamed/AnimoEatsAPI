@@ -13,18 +13,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, mean_squared_error, r2_score
 import aiohttp
 import joblib  # For model serialization
-import logging  # Import logging module
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,  # Set the logging level
-    format='%(asctime)s - %(levelname)s - %(message)s',  # Log format
-    handlers=[
-        logging.StreamHandler(),  # Log to console
-        # Uncomment the next line to log to a file
-        # logging.FileHandler("app.log")
-    ]
-)
 
 # Load environment variables
 load_dotenv()
@@ -106,11 +94,11 @@ def fetch_data_user_data(user_id):
 
         # Combine the DataFrames
         combined_df = pd.concat([df_health, df_allergies, df_category_pivot], axis=1)
-        logging.info(f"Combined DataFrame for user {user_id}:\n{combined_df}")
+        print(combined_df)
         return combined_df
 
     except Exception as e:
-        logging.error(f"An error occurred while fetching user data: {e}")
+        print(f"An error occurred: {e}")
         return pd.DataFrame()
 
     finally:
@@ -148,37 +136,29 @@ def fetch_and_transform_food_data(user_id):
         # **Rename 'id' to 'foodItemId'**
         if 'id' in df.columns:
             df.rename(columns={'id': 'foodItemId'}, inplace=True)
-            logging.info("Renamed 'id' to 'foodItemId' in df_food_details.")
+            print("Renamed 'id' to 'foodItemId' in df_food_details.")
         else:
-            logging.warning(f"'id' column not found in df_food_details. Available columns: {df.columns.tolist()}")
+            print("Warning: 'id' column not found in df_food_details. Available columns:", df.columns.tolist())
 
         # **Optional: Verify the renaming**
-        logging.debug(f"df_food_details columns after renaming: {df.columns.tolist()}")
+        print("df_food_details columns after renaming:", df.columns.tolist())
 
         # Return the DataFrame with all data
-        logging.info(f"Food Details DataFrame:\n{df}")
+        print(df)
         return df
 
     except Exception as e:
-        logging.error(f"An error occurred in fetch_and_transform_food_data: {e}")
+        print(f"An error occurred in fetch_and_transform_food_data: {e}")
         return pd.DataFrame()
 
     finally:
         if connection:
             connection.close()
 
-def fetch_and_transform_swipe_data(user_id):
-    """
-    Fetches swipe data from the PostgreSQL database and transforms it into a dictionary
-    that maps each user_id to their liked and disliked food items along with categories.
 
-    Returns:
-        dict: A dictionary where each key is a user_id and the value is another dictionary
-              containing lists of foodItemId, categoryId, and preference (1 for like, 0 for dislike).
-    """
+def fetch_and_transform_swipe_data(user_id):
     connection = None
     try:
-        # Establish a connection to the PostgreSQL database
         connection = pg8000.connect(
             host=DB_HOST,
             port=DB_PORT,
@@ -188,67 +168,49 @@ def fetch_and_transform_swipe_data(user_id):
         )
         cursor = connection.cursor()
 
-        # SQL query to fetch data from app_user.food_swipe_history
         sql_query = '''
-        SELECT "userId", "foodItemId", "categoryId", "preference"
+        SELECT "userId", "categoryId", "preference"
         FROM app_user.food_swipe_history
         WHERE "userId" = %s;
         '''
 
         cursor.execute(sql_query, (user_id,))
         data = cursor.fetchall()
-
-        # Fetch column names from the cursor description
         column_names = [desc[0] for desc in cursor.description]
-
-        # Convert to DataFrame
         df = pd.DataFrame(data, columns=column_names)
 
-        # Rename columns for consistency
         df.rename(columns={
             "userId": "user_id",
-            "foodItemId": "foodItemId",
-            "categoryId": "categoryId"
+            "categoryId": "categoryId",
+            "preference": "preference"
         }, inplace=True)
 
-        # Map categoryId to category names if category_mapping is provided
         if "category_mapping" in globals():
             df["categoryName"] = df["categoryId"].map(category_mapping)
         else:
-            # If no mapping is provided, you can choose to keep the ID or handle accordingly
             df["categoryName"] = df["categoryId"]
 
-        # Map 'like' to 1 and 'dislike' to 0
         df["preference"] = df["preference"].map({
             "like": 1,
             "dislike": 0
-        })
+        }).astype(int)
 
-        # Handle any unexpected preference values by setting them to a default (e.g., NaN) and dropping
-        df = df.dropna(subset=["preference"])
-
-        # Convert preferences to integer type
-        df["preference"] = df["preference"].astype(int)
-
-        # Group by user_id and collect foodItemId, categoryId, and preference
         expected_recommendations = {}
         for uid, group in df.groupby("user_id"):
             expected_recommendations[uid] = {
-                "foodItemId": group["foodItemId"].tolist(),
-                "categoryId": group["categoryId"].tolist(),
-                "preference": group["preference"].tolist()
+                "categories": group["categoryId"].tolist(),
+                "preferences": group["preference"].tolist()
             }
-        logging.info(f"Expected Recommendations for user {user_id}: {expected_recommendations}")
-        # Return the recommendations dictionary
+
         return expected_recommendations
 
     except Exception as e:
-        logging.error(f"An error occurred while fetching swipe data: {e}")
+        print(f"An error occurred: {e}")
         return {}
-
     finally:
         if connection:
             connection.close()
+
 
 class RecommendationRequest(BaseModel):
     user_id: int
@@ -257,6 +219,8 @@ class RecommendationRequest(BaseModel):
 class RecommendationResponse(BaseModel):
     message: str
     data: list
+
+
 
 # Define weights
 nutrition_weight = 0.8
@@ -284,49 +248,24 @@ nutrient_column_mapping = {
     'sodium': 'sodium'
 }
 
-from imblearn.over_sampling import SMOTE
-from sklearn.model_selection import GridSearchCV
-from sklearn.ensemble import RandomForestClassifier
-
 def recommend_food_for_user(combined_df, df_food_details, expected_recommendation, user_id, top_n=20):
-    """
-    Generates top N food recommendations for the specified user based on their preferences and nutritional needs,
-    using SVC for categorical preferences and SVR for nutritional matching, then combining them.
-    Also logs evaluation metrics for both models.
-
-    Parameters:
-    - combined_df (pd.DataFrame): DataFrame containing user information, category preferences, and nutritional needs.
-    - df_food_details (pd.DataFrame): DataFrame containing food item details and nutritional information.
-    - expected_recommendation (dict): Dictionary mapping user_id to expected foodItemId, categoryId, and preference.
-    - user_id (int): The ID of the user for whom to generate recommendations.
-    - top_n (int): Number of top recommendations to generate.
-
-    Returns:
-    - pd.DataFrame: DataFrame containing the top recommended dishes with rankings and scores.
-    """
-    logging.info(f"Generating recommendations for User ID: {user_id}")
-
-    # Extract user data
+    print(f"Generating recommendations for User ID: {user_id}")
     user_data = combined_df[combined_df['user_id'] == user_id]
     if user_data.empty:
-        logging.warning(f"No data found for User ID {user_id}.")
-        return pd.DataFrame()  # Return empty DataFrame
+        print(f"No data found for User ID {user_id}.")
+        return pd.DataFrame()
 
     user_data = user_data.iloc[0]
     menu_data = df_food_details.copy()
 
-    # Extract user expected categories and preferences
-    expected_food_ids = expected_recommendation.get(user_id, {}).get('foodItemId', [])
-    expected_categories = expected_recommendation.get(user_id, {}).get('categoryId', [])
-    preferences = expected_recommendation.get(user_id, {}).get('preference', [])
-
-    # Map foodItemId to preference
-    food_preference_map = dict(zip(expected_food_ids, preferences))
-    menu_data['preference'] = menu_data['foodItemId'].map(food_preference_map).fillna(0).astype(int)
+    expected_categories = expected_recommendation.get(user_id, {}).get('categories', [])
+    preferences = expected_recommendation.get(user_id, {}).get('preferences', [])
+    category_preference_map = dict(zip(expected_categories, preferences))
+    menu_data['preference'] = menu_data['categoryId'].map(category_preference_map).fillna(0).astype(int)
 
     # Check if user has enough preferences to train SVC
     if menu_data['preference'].nunique() < 2:
-        logging.warning("Not enough preference data to train SVC.")
+        print("Not enough preference data to train SVC.")
         return pd.DataFrame()
 
     # 1. Calculate Nutrient Match Score (Manual Calculation)
@@ -340,7 +279,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
             missing_nutrients.append(nutrient)
 
     if missing_nutrients:
-        logging.warning(f"Missing or invalid nutritional needs for User ID {user_id}: {missing_nutrients}")
+        print(f"Missing or invalid nutritional needs for User ID {user_id}: {missing_nutrients}")
         return pd.DataFrame()  # Return empty DataFrame
 
     # Calculate nutrient match ratios, capped at 1.0
@@ -369,20 +308,16 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
 
     # Handle missing category features
     if not category_features:
-        logging.warning("No category features found for SVC.")
+        print("No category features found for SVC.")
         return pd.DataFrame()
 
     X_svc = menu_data[category_features]
     y_svc = menu_data['preference']
 
     # Split data into training and testing sets for SVC
-    try:
-        X_train_svc, X_test_svc, y_train_svc, y_test_svc = train_test_split(
-            X_svc, y_svc, test_size=0.2, random_state=42, stratify=y_svc
-        )
-    except ValueError as e:
-        logging.error(f"Error during train-test split: {e}")
-        return pd.DataFrame()
+    X_train_svc, X_test_svc, y_train_svc, y_test_svc = train_test_split(
+        X_svc, y_svc, test_size=0.2, random_state=42, stratify=y_svc
+    )
 
     # Impute missing values
     imputer_svc = SimpleImputer(strategy='mean')
@@ -394,76 +329,120 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     X_train_svc_scaled = scaler_svc.fit_transform(X_train_svc_imputed)
     X_test_svc_scaled = scaler_svc.transform(X_test_svc_imputed)
 
-    # Handle class imbalance with SMOTE
-    smote = SMOTE(random_state=42)
-    X_train_svc_resampled, y_train_svc_resampled = smote.fit_resample(X_train_svc_scaled, y_train_svc)
-    logging.info(f"After SMOTE, counts of label '1': {sum(y_train_svc_resampled)} and label '0': {len(y_train_svc_resampled) - sum(y_train_svc_resampled)}")
-
-    # Hyperparameter Tuning with GridSearchCV
-    param_grid = {
-        'C': [0.1, 1, 10],
-        'gamma': [1, 0.1, 0.01],
-        'kernel': ['rbf', 'linear']
-    }
-
-    grid = GridSearchCV(SVC(probability=True, class_weight='balanced', random_state=42),
-                        param_grid, refit=True, verbose=0, cv=5, scoring='f1')
-
+    # Initialize and train the SVC model
+    svc = SVC(kernel='rbf', probability=True, random_state=42)
     try:
-        grid.fit(X_train_svc_resampled, y_train_svc_resampled)
-        logging.info(f"Best parameters from GridSearchCV: {grid.best_params_}")
-        svc_best = grid.best_estimator_
+        svc.fit(X_train_svc_scaled, y_train_svc)
     except Exception as e:
-        logging.error(f"Error during GridSearchCV: {e}")
+        print(f"An error occurred while training SVC: {e}")
         return pd.DataFrame()
 
     # Predict on the test set and calculate evaluation metrics for SVC
     try:
-        y_pred_svc = svc_best.predict(X_test_svc_scaled)
+        y_pred_svc = svc.predict(X_test_svc_scaled)
         accuracy = accuracy_score(y_test_svc, y_pred_svc)
         precision = precision_score(y_test_svc, y_pred_svc, zero_division=0)
         recall = recall_score(y_test_svc, y_pred_svc, zero_division=0)
         f1 = f1_score(y_test_svc, y_pred_svc, zero_division=0)
 
-        logging.info("\nSVC (Tuned) Evaluation Metrics:")
-        logging.info(f"Accuracy: {accuracy:.4f}")
-        logging.info(f"Precision: {precision:.4f}")
-        logging.info(f"Recall: {recall:.4f}")
-        logging.info(f"F1 Score: {f1:.4f}")
+        print("\nSVC Evaluation Metrics:")
+        print(f"Accuracy: {accuracy:.4f}")
+        print(f"Precision: {precision:.4f}")
+        print(f"Recall: {recall:.4f}")
+        print(f"F1 Score: {f1:.4f}")
     except Exception as e:
-        logging.error(f"Error during SVC evaluation: {e}")
+        print(f"An error occurred during SVC evaluation: {e}")
         return pd.DataFrame()
 
     # Retrain SVC on the entire dataset
     try:
-        X_svc_full = X_svc.copy()
-        imputer_svc_full = SimpleImputer(strategy='mean')
-        X_svc_imputed_full = imputer_svc_full.fit_transform(X_svc_full)
-        scaler_svc_full = StandardScaler()
-        X_svc_scaled_full = scaler_svc_full.fit_transform(X_svc_imputed_full)
-
-        # Apply SMOTE to full data
-        smote_full = SMOTE(random_state=42)
-        X_svc_resampled_full, y_svc_resampled_full = smote_full.fit_resample(X_svc_scaled_full, y_svc)
-
-        # Fit the best SVC model on the full resampled data
-        svc_best.fit(X_svc_resampled_full, y_svc_resampled_full)
-        logging.info("SVC model retrained on the full resampled dataset.")
-
-        # Predict preference probabilities on all menu items
-        preference_probs = svc_best.predict_proba(X_svc_scaled_full)[:, 1]  # Probability of class '1' (like)
-        menu_data['preference_score'] = preference_probs
-        logging.debug(f"Preference scores added to menu_data.")
+        X_svc_imputed_full = imputer_svc.fit_transform(X_svc)
+        X_svc_scaled_full = scaler_svc.fit_transform(X_svc_imputed_full)
+        svc.fit(X_svc_scaled_full, y_svc)
     except Exception as e:
-        logging.error(f"Error during retraining SVC on full data: {e}")
+        print(f"An error occurred while retraining SVC on full data: {e}")
         return pd.DataFrame()
 
-    # 3. Train SVR for Nutrient Matching (Assuming SVR is performing well)
-    # [Existing SVR code remains unchanged]
+    # Predict preference probabilities on all menu items
+    try:
+        X_pred_svc_full = X_svc_scaled_full  # Using all menu items
+        preference_probs = svc.predict_proba(X_pred_svc_full)[:, 1]  # Probability of class '1' (like)
+        menu_data['preference_score'] = preference_probs
+    except NotFittedError as e:
+        print(f"SVC model is not fitted: {e}")
+        return pd.DataFrame()
+    except Exception as e:
+        print(f"An error occurred during SVC prediction: {e}")
+        return pd.DataFrame()
 
-    # ... [SVR training and prediction code]
+    # 3. Train SVR for Nutrient Matching
+    # Prepare nutrient features
+    nutrient_features = [nutrient for nutrient in nutritional_weights.keys() if nutrient in menu_data.columns]
+    if not nutrient_features:
+        print("No nutrient features found for SVR.")
+        return pd.DataFrame()
+
+    X_svr = menu_data[nutrient_features]
+    y_svr = menu_data['nutrient_score']
+
+    # Split data into training and testing sets for SVR
+    X_train_svr, X_test_svr, y_train_svr, y_test_svr = train_test_split(
+        X_svr, y_svr, test_size=0.2, random_state=42
+    )
+
+    # Impute missing values
+    imputer_svr = SimpleImputer(strategy='mean')
+    X_train_svr_imputed = imputer_svr.fit_transform(X_train_svr)
+    X_test_svr_imputed = imputer_svr.transform(X_test_svr)
+
+    # Feature Scaling
+    scaler_svr = StandardScaler()
+    X_train_svr_scaled = scaler_svr.fit_transform(X_train_svr_imputed)
+    X_test_svr_scaled = scaler_svr.transform(X_test_svr_imputed)
+
+    # Initialize and train the SVR model
+    svr = SVR(kernel='rbf')
+    try:
+        svr.fit(X_train_svr_scaled, y_train_svr)
+    except Exception as e:
+        print(f"An error occurred while training SVR: {e}")
+        return pd.DataFrame()
+
+    # Predict on the test set and calculate evaluation metrics for SVR
+    try:
+        y_pred_svr = svr.predict(X_test_svr_scaled)
+        mse = mean_squared_error(y_test_svr, y_pred_svr)
+        r2 = r2_score(y_test_svr, y_pred_svr)
+
+        print("\nSVR Evaluation Metrics:")
+        print(f"Mean Squared Error (MSE): {mse:.4f}")
+        print(f"R-squared (R²): {r2:.4f}")
+    except Exception as e:
+        print(f"An error occurred during SVR evaluation: {e}")
+        return pd.DataFrame()
+
+    # Retrain SVR on the entire dataset
+    try:
+        X_svr_imputed_full = imputer_svr.fit_transform(X_svr)
+        X_svr_scaled_full = scaler_svr.fit_transform(X_svr_imputed_full)
+        svr.fit(X_svr_scaled_full, y_svr)
+    except Exception as e:
+        print(f"An error occurred while retraining SVR on full data: {e}")
+        return pd.DataFrame()
+
+    # Predict nutrient scores on all menu items
+    try:
+        predicted_nutrient_scores = svr.predict(X_svr_scaled_full)
+        menu_data['predicted_nutrient_score'] = predicted_nutrient_scores
+    except NotFittedError as e:
+        print(f"SVR model is not fitted: {e}")
+        return pd.DataFrame()
+    except Exception as e:
+        print(f"An error occurred during SVR prediction: {e}")
+        return pd.DataFrame()
 
     # 4. Combine SVC and SVR Predictions into Composite Score
+    # Define weights for SVC and SVR
     svc_weight = 0.2  # 20% weight for preference
     svr_weight = 0.8  # 80% weight for nutrient matching
 
@@ -511,9 +490,9 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
             score_float = float(row['score'])
 
             # Debugging statement to verify types and values
-            logging.debug(f"Inserting user_id: {user_id_int}, "
-                          f"food_detail_id: {food_detail_id_int}, "
-                          f"rank: {rank_int}, score: {score_float}")
+            print(f"Inserting user_id: {user_id_int} (type: {type(user_id_int)}), "
+                  f"food_detail_id: {food_detail_id_int} (type: {type(food_detail_id_int)}), "
+                  f"rank: {rank_int} (type: {type(rank_int)}), score: {score_float} (type: {type(score_float)})")
 
             query = '''
             INSERT INTO app_user.user_food_recommendations (user_id, food_detail_id, rank, score)
@@ -524,15 +503,15 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
             cursor.execute(query, (user_id_int, food_detail_id_int, rank_int, score_float))
 
         connection.commit()
-        logging.info("Top recommended dishes have been successfully pushed to the database.")
+        print("Top recommended dishes have been successfully pushed to the database.")
     except Exception as e:
-        logging.error(f"An error occurred while pushing recommendations to the database: {e}")
+        print(f"An error occurred while pushing recommendations to the database: {e}")
     finally:
         if connection:
             connection.close()
 
-    logging.info("\nTop Recommended Dishes with Scores:")
-    logging.info(f"{top_dishes_with_scores}")
+    print("\nTop Recommended Dishes with Scores:")
+    print(top_dishes_with_scores)
     return top_dishes_with_scores
 
 # API Endpoint
@@ -543,7 +522,7 @@ async def get_recommendations(request: RecommendationRequest):
     """
     try:
         user_id = request.user_id  # Assign user_id from request first
-        logging.info(f"Received request for User ID: {user_id}")
+        print(f"Received request for User ID: {user_id}")
 
         # Construct the external URL with the provided user_id
         external_url = f"https://app-ivqcpctaoq-uc.a.run.app/dev/food/{user_id}/available"
@@ -552,7 +531,6 @@ async def get_recommendations(request: RecommendationRequest):
         async with aiohttp.ClientSession() as session:
             async with session.get(external_url) as response:
                 if response.status != 200:
-                    logging.error(f"Failed to fetch external data. Status Code: {response.status}")
                     raise HTTPException(
                         status_code=response.status,
                         detail="Failed to fetch external data."
@@ -560,7 +538,6 @@ async def get_recommendations(request: RecommendationRequest):
                 external_data = await response.json()
                 # TODO: Process external_data as needed
                 # For example, you might integrate external_data into your dataframes
-                logging.debug(f"External data fetched: {external_data}")
 
         # Fetch and transform data
         combined_df = fetch_data_user_data(user_id)
@@ -569,7 +546,6 @@ async def get_recommendations(request: RecommendationRequest):
 
         # **Fix starts here**
         if not expected_recommendation:
-            logging.warning("No recommendations available.")
             raise HTTPException(status_code=404, detail="No recommendations available.")
         # **Fix ends here**
 
@@ -577,7 +553,7 @@ async def get_recommendations(request: RecommendationRequest):
         user_id = int(user_id)
         top_n = 20  # Default value; adjust as needed
 
-        logging.info(f"Generating top {top_n} recommendations for User ID: {user_id}")
+        print(f"Generating top {top_n} recommendations for User ID: {user_id}")
 
         # Generate recommendations
         recommendations_df = recommend_food_for_user(
@@ -589,7 +565,6 @@ async def get_recommendations(request: RecommendationRequest):
         )
 
         if recommendations_df.empty:
-            logging.warning(f"No recommendations available for user {user_id}")
             raise HTTPException(
                 status_code=404,
                 detail=f"No recommendations available for user {user_id}"
@@ -608,5 +583,5 @@ async def get_recommendations(request: RecommendationRequest):
         raise http_exc
     except Exception as e:
         # Log the exception details as needed
-        logging.error(f"An unexpected error occurred: {e}")
+        print(f"An unexpected error occurred: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
