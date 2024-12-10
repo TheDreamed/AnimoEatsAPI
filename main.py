@@ -354,6 +354,21 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
         print(f"An error occurred during SVC evaluation: {e}")
         return pd.DataFrame()
 
+    # **Compute and Print Feature Importance for SVC using Permutation Importance**
+    try:
+        svc_permutation_importance = permutation_importance(
+            svc, X_test_svc_scaled, y_test_svc, n_repeats=10, random_state=42, scoring='accuracy'
+        )
+        feature_importances_svc = pd.Series(
+            svc_permutation_importance.importances_mean,
+            index=category_features
+        ).sort_values(ascending=False)
+        print("\nSVC Feature Importances (Permutation Importance):")
+        for feature, importance in feature_importances_svc.items():
+            print(f"{feature}: {importance:.4f}")
+    except Exception as e:
+        print(f"An error occurred while computing SVC feature importance: {e}")
+
     # Retrain SVC on the entire dataset
     try:
         X_svc_imputed_full = imputer_svc.fit_transform(X_svc)
@@ -420,6 +435,21 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
     except Exception as e:
         print(f"An error occurred during SVR evaluation: {e}")
         return pd.DataFrame()
+
+    # **Compute and Print Feature Importance for SVR using Permutation Importance**
+    try:
+        svr_permutation_importance = permutation_importance(
+            svr, X_test_svr_scaled, y_test_svr, n_repeats=10, random_state=42, scoring='r2'
+        )
+        feature_importances_svr = pd.Series(
+            svr_permutation_importance.importances_mean,
+            index=nutrient_features
+        ).sort_values(ascending=False)
+        print("\nSVR Feature Importances (Permutation Importance):")
+        for feature, importance in feature_importances_svr.items():
+            print(f"{feature}: {importance:.4f}")
+    except Exception as e:
+        print(f"An error occurred while computing SVR feature importance: {e}")
 
     # Retrain SVR on the entire dataset
     try:
