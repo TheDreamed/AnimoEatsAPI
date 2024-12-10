@@ -500,7 +500,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
             ON CONFLICT (user_id, food_detail_id)
             DO UPDATE SET rank = EXCLUDED.rank;
             '''
-            cursor.execute(query, (user_id_int, food_detail_id_int, rank_int, score_float))
+            cursor.execute(query, (user_id_int, food_detail_id_int, rank_int))
 
         connection.commit()
         print("Top recommended dishes have been successfully pushed to the database.")
