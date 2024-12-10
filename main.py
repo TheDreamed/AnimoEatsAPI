@@ -498,7 +498,7 @@ def recommend_food_for_user(combined_df, df_food_details, expected_recommendatio
             INSERT INTO app_user.user_food_recommendations (user_id, food_detail_id, rank)
             VALUES (%s, %s, %s, %s)
             ON CONFLICT (user_id, food_detail_id)
-            DO UPDATE SET rank = EXCLUDED.rank, score = EXCLUDED.score;
+            DO UPDATE SET rank = EXCLUDED.rank;
             '''
             cursor.execute(query, (user_id_int, food_detail_id_int, rank_int, score_float))
 
