@@ -11,6 +11,7 @@ from sklearn.impute import SimpleImputer
 from sklearn.exceptions import NotFittedError
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, mean_squared_error, r2_score
+from sklearn.inspection import permutation_importance
 import aiohttp
 import joblib  # For model serialization
 
