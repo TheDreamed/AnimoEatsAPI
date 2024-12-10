@@ -228,7 +228,7 @@ category_weight_percent = 0.2
 
 # Define specific weights for nutritional features
 nutritional_weights = {
-    'calories': 0.2,      # 50% of 80% weight
+    'calories': 0.0,      # 50% of 80% weight
     'protein': 0.3,       # 20% of 80% weight
     'carbohydrates': 0.5, # 10% of 80% weight
     'fat': 0.2,           # 10% of 80% weight
